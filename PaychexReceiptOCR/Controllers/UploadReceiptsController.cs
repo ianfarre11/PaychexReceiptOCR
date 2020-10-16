@@ -67,8 +67,15 @@ namespace PaychexReceiptOCR.Controllers
             // Used to locate the tessdata folder
             string contentRootPath = _env.ContentRootPath;
 
-            // Holds the mean confidence and text data read from tesseract
+            // Holds the text data read from tesseract
             List<string> output = new List<string>();
+
+            // Holds the mean confidence
+            string mean = "";
+
+            // Holds the raw text
+            string raw = "";
+
             try
             {
                 // Creates engine
@@ -81,10 +88,8 @@ namespace PaychexReceiptOCR.Controllers
                         using (var page = engine.Process(img))
                         {
                             // Adds reading to output
-                            var text = page.GetText();
-                            output.Add("Mean confidence: " + page.GetMeanConfidence());
-                            output.Add("Text (GetText): " + text);
-                            output.Add("Iterated Text: ");
+                            ViewBag.raw = page.GetText();
+                            ViewBag.meanConfidence = page.GetMeanConfidence();
 
                             // Redirects console ouput to a string
                             var sw = new StringWriter();

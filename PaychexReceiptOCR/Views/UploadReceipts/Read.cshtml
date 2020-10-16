@@ -6,6 +6,13 @@
     <title>Image Upload</title>
 </head>
 <body>
+    <h3>Mean Confidence: @ViewBag.meanConfidence</h3>
+    <br />
+    <h3>Raw Text:</h3>
+    <br />
+    <p>@ViewBag.raw</p>
+    <br />
+    <h3>Iterated Text: </h3>
     @foreach(string line in ViewBag.output)
     {
         <p>@line</p>
