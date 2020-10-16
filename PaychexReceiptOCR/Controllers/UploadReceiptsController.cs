@@ -70,12 +70,6 @@ namespace PaychexReceiptOCR.Controllers
             // Holds the text data read from tesseract
             List<string> output = new List<string>();
 
-            // Holds the mean confidence
-            string mean = "";
-
-            // Holds the raw text
-            string raw = "";
-
             try
             {
                 // Creates engine
