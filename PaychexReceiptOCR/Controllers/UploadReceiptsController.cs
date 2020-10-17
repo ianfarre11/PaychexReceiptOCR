@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PaychexReceiptOCR.Models;
 using Tesseract;
 
 namespace PaychexReceiptOCR.Controllers
@@ -21,11 +22,6 @@ namespace PaychexReceiptOCR.Controllers
         }
 
         public IActionResult Index()
-        {
-            return View();
-        }
-
-        public IActionResult Read()
         {
             return View();
         }
@@ -46,12 +42,11 @@ namespace PaychexReceiptOCR.Controllers
             {
                 // Creates a path to wwwroot\userReceipts for the receipt to be stored
                 var ImagePath = @"userReceipts\";
-                var Extension = Path.GetExtension(receipts[0].FileName);
-                var RelativeImagePath = ImagePath + receipts[0].FileName + Extension;
+                var RelativeImagePath = ImagePath + receipts[0].FileName;
                 AbsImagePath = Path.Combine(wwwrootPath, RelativeImagePath);
 
                 // Stores the receipt in wwwroot\userReceipts
-                using (var fileStream=new FileStream(AbsImagePath, FileMode.Create))
+                using (var fileStream = new FileStream(AbsImagePath, FileMode.Create))
                 {
                     receipts[0].CopyTo(fileStream);
                 }
@@ -64,6 +59,9 @@ namespace PaychexReceiptOCR.Controllers
         [HttpPost]
         public IActionResult OCRRead(string filePath)
         {
+            // User receipt model used to store the data which is passed to the view
+            Receipt model = new Receipt();
+
             // Used to locate the tessdata folder
             string contentRootPath = _env.ContentRootPath;
 
@@ -81,9 +79,9 @@ namespace PaychexReceiptOCR.Controllers
                         // Reads receipt
                         using (var page = engine.Process(img))
                         {
-                            // Adds reading to output
-                            ViewBag.raw = page.GetText();
-                            ViewBag.meanConfidence = page.GetMeanConfidence();
+                            // Adds data to model
+                            model.RawText = page.GetText();
+                            model.MeanConfidence = page.GetMeanConfidence();
 
                             // Redirects console ouput to a string
                             var sw = new StringWriter();
@@ -143,10 +141,12 @@ namespace PaychexReceiptOCR.Controllers
                 output.Add("Details: ");
                 output.Add(e.ToString());
             };
-            
-            // Stores reading in ViewBag to be read by View Object
-            ViewBag.output = output;
-            return View("Read");
+
+            // Add iterated text to model 
+            model.IteratedText = output;
+
+            // Passes model to Post view
+            return View(model);
         }
     }
 }
