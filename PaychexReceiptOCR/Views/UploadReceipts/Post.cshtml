@@ -1,19 +1,19 @@
-﻿@{
-}
+﻿@model PaychexReceiptOCR.Models.Receipt
+
 <!DOCTYPE html>
 <html>
 <head>
     <title>Image Upload</title>
 </head>
 <body>
-    <h3>Mean Confidence: @ViewBag.meanConfidence</h3>
+    <h3>Mean Confidence: @Model.MeanConfidence</h3>
     <br />
     <h3>Raw Text:</h3>
     <br />
-    <p>@ViewBag.raw</p>
+    <p>@Model.RawText</p>
     <br />
     <h3>Iterated Text: </h3>
-    @foreach(string line in ViewBag.output)
+    @foreach (string line in Model.IteratedText)
     {
         <p>@line</p>
     }
