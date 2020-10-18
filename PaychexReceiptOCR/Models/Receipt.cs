@@ -13,6 +13,8 @@ namespace PaychexReceiptOCR.Models
 
         public string RawText { get; set; }
 
+        public string Path { get; set; }
+
         public List<string> IteratedText { get; set; }
     }
 }

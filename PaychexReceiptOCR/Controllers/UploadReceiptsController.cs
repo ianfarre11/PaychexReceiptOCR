@@ -32,121 +32,134 @@ namespace PaychexReceiptOCR.Controllers
             // Finds path to wwwroot
             string wwwrootPath = _env.WebRootPath;
 
-            // Recieves receipt from View
-            // Currently set up to only process one receipt at a time
-            var receipts = HttpContext.Request.Form.Files;
+            // Recieves files uploaded from the form
+            var uploads = HttpContext.Request.Form.Files;
 
-            var AbsImagePath = "";
+            List<Receipt> receipts = new List<Receipt>();
 
-            if (receipts.Count != 0)
+            if (uploads.Count != 0)
             {
-                // Creates a path to wwwroot\userReceipts for the receipt to be stored
-                var ImagePath = @"userReceipts\";
-                var RelativeImagePath = ImagePath + receipts[0].FileName;
-                AbsImagePath = Path.Combine(wwwrootPath, RelativeImagePath);
-
-                // Stores the receipt in wwwroot\userReceipts
-                using (var fileStream = new FileStream(AbsImagePath, FileMode.Create))
+                // Creates a new Receipt instance for each uploaded file
+                // Adds all these new Receipts to the receipts List
+                foreach (var upload in uploads)
                 {
-                    receipts[0].CopyTo(fileStream);
+                    Receipt newReceipt = new Receipt();
+                    newReceipt.Name = upload.FileName;
+
+                    // Creates a path to wwwroot\userReceipts for the image to be stored
+                    var ImagePath = @"userReceipts\";
+                    var RelativeImagePath = ImagePath + upload.FileName;
+                    var AbsImagePath = Path.Combine(wwwrootPath, RelativeImagePath);
+
+                    newReceipt.Path = AbsImagePath;
+
+                    // Stores the image file in wwwroot\userReceipts
+                    using (var fileStream = new FileStream(AbsImagePath, FileMode.Create))
+                    {
+                        upload.CopyTo(fileStream);
+                    }
+
+                    receipts.Add(newReceipt);
                 }
             }
 
-            // Gives the path to the OCRRead method
-            return OCRRead(AbsImagePath, receipts[0].FileName);
+            // Gives the receipts list to the OCRRead method
+            return OCRRead(receipts);
         }
 
         [HttpPost]
-        public IActionResult OCRRead(string filePath, string fileName)
+        public IActionResult OCRRead(List<Receipt> model)
         {
-            // User receipt model used to store the data which is passed to the view
-            Receipt model = new Receipt();
-            model.Name = fileName;
 
             // Used to locate the tessdata folder
             string contentRootPath = _env.ContentRootPath;
 
-            // Holds the text data read from tesseract
-            List<string> output = new List<string>();
-
-            try
+            // Iterates through the receipts and reads the associated images
+            // Stores the readings in the receipts variables
+            foreach (Receipt receipt in model)
             {
-                // Creates engine
-                using (var engine = new TesseractEngine(contentRootPath, "eng", EngineMode.Default))
+                // Holds the iterated text data read from tesseract
+                List<string> output = new List<string>();
+
+                try
                 {
-                    // Loads receipt as Tesseract.Pix instance
-                    using (var img = Pix.LoadFromFile(filePath))
+                    // Creates engine
+                    using (var engine = new TesseractEngine(contentRootPath, "eng", EngineMode.Default))
                     {
-                        // Reads receipt
-                        using (var page = engine.Process(img))
+                        // Loads receipt as Tesseract.Pix instance
+                        using (var img = Pix.LoadFromFile(receipt.Path))
                         {
-                            // Adds data to model
-                            model.RawText = page.GetText();
-                            model.MeanConfidence = page.GetMeanConfidence();
-
-                            // Redirects console ouput to a string
-                            var sw = new StringWriter();
-                            Console.SetOut(sw);
-                            Console.SetError(sw);
-
-                            // Iterates through the tesseract page  
-                            using (var iter = page.GetIterator())
+                            // Reads receipt
+                            using (var page = engine.Process(img))
                             {
-                                iter.Begin();
+                                // Adds reading to receipt
+                                receipt.RawText = page.GetText();
+                                receipt.MeanConfidence = page.GetMeanConfidence();
 
-                                do
+                                // Redirects console ouput to a string
+                                var sw = new StringWriter();
+                                Console.SetOut(sw);
+                                Console.SetError(sw);
+
+                                // Iterates through the tesseract page  
+                                using (var iter = page.GetIterator())
                                 {
+                                    iter.Begin();
+
                                     do
                                     {
                                         do
                                         {
                                             do
                                             {
-                                                if (iter.IsAtBeginningOf(PageIteratorLevel.Block))
+                                                do
                                                 {
-                                                    // Whenever a new BLOCK it iterated, the current StringWriter contents are added to the the ouput
-                                                    // and a new StringWriter object in instantiated in place of the old one
-                                                    output.Add(sw.ToString());
-                                                    sw = new StringWriter();
-                                                    Console.SetOut(sw);
-                                                    Console.SetError(sw);
-                                                }
+                                                    if (iter.IsAtBeginningOf(PageIteratorLevel.Block))
+                                                    {
+                                                        // Whenever a new BLOCK it iterated, the current StringWriter contents are added to the the ouput
+                                                        // and a new StringWriter object in instantiated in place of the old one
+                                                        output.Add(sw.ToString());
+                                                        sw = new StringWriter();
+                                                        Console.SetOut(sw);
+                                                        Console.SetError(sw);
+                                                    }
 
-                                                Console.Write(iter.GetText(PageIteratorLevel.Word));
-                                                Console.Write(" ");
+                                                    Console.Write(iter.GetText(PageIteratorLevel.Word));
+                                                    Console.Write(" ");
 
-                                                if (iter.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word))
+                                                    if (iter.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word))
+                                                    {
+                                                        Console.WriteLine("");
+                                                    }
+                                                } while (iter.Next(PageIteratorLevel.TextLine, PageIteratorLevel.Word));
+
+                                                if (iter.IsAtFinalOf(PageIteratorLevel.Para, PageIteratorLevel.TextLine))
                                                 {
                                                     Console.WriteLine("");
                                                 }
-                                            } while (iter.Next(PageIteratorLevel.TextLine, PageIteratorLevel.Word));
+                                            } while (iter.Next(PageIteratorLevel.Para, PageIteratorLevel.TextLine));
+                                        } while (iter.Next(PageIteratorLevel.Block, PageIteratorLevel.Para));
+                                    } while (iter.Next(PageIteratorLevel.Block));
+                                }
 
-                                            if (iter.IsAtFinalOf(PageIteratorLevel.Para, PageIteratorLevel.TextLine))
-                                            {
-                                                Console.WriteLine("");
-                                            }
-                                        } while (iter.Next(PageIteratorLevel.Para, PageIteratorLevel.TextLine));
-                                    } while (iter.Next(PageIteratorLevel.Block, PageIteratorLevel.Para));
-                                } while (iter.Next(PageIteratorLevel.Block));
+                                output.Add(sw.ToString());
                             }
-
-                            output.Add(sw.ToString());
                         }
                     }
                 }
+                catch (Exception e)
+                {
+                    Trace.TraceError(e.ToString());
+                    output.Add("Unexpected Error: " + e.Message);
+                    output.Add("Details: ");
+                    output.Add(e.ToString());
+                };
+
+                // Add iterated text to receipt model
+                receipt.IteratedText = output;
             }
-            catch (Exception e)
-            {
-                Trace.TraceError(e.ToString());
-                output.Add("Unexpected Error: " + e.Message);
-                output.Add("Details: ");
-                output.Add(e.ToString());
-            };
 
-            // Add iterated text to model 
-            model.IteratedText = output;
-
-            // Passes model to Post view
+            // Passes List of receipts to Post view
             return View(model);
         }
     }
