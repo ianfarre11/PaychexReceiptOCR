@@ -1,14 +1,21 @@
 ﻿@model PaychexReceiptOCR.Models.Receipt
 
-
-<h3>Mean Confidence: @Model.MeanConfidence</h3>
-<br />
-<h3>Raw Text:</h3>
-<br />
-<p>@Model.RawText</p>
-<br />
-<h3>Iterated Text: </h3>
-@foreach (string line in Model.IteratedText)
-{
-    <p>@line</p>
-}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Receipt Data</title>
+</head>
+<body>
+    <h3>Mean Confidence: @Model.MeanConfidence</h3>
+    <br />
+    <h3>Raw Text:</h3>
+    <br />
+    <p>@Model.RawText</p>
+    <br />
+    <h3>Iterated Text: </h3>
+    @foreach (string line in Model.IteratedText)
+    {
+        <p>@line</p>
+    }
+</body>
+</html>
