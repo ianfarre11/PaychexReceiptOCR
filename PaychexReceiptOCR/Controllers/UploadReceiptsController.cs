@@ -32,28 +32,28 @@ namespace PaychexReceiptOCR.Controllers
             // Finds path to wwwroot
             string wwwrootPath = _env.WebRootPath;
 
-            // Recieves receipt from View
-            // Currently set up to only process one receipt at a time
+            // Recieves files uploaded from the form
             var uploads = HttpContext.Request.Form.Files;
-
 
             List<Receipt> receipts = new List<Receipt>();
 
             if (uploads.Count != 0)
             {
+                // Creates a new Receipt instance for each uploaded file
+                // Adds all these new Receipts to the receipts List
                 foreach (var upload in uploads)
                 {
                     Receipt newReceipt = new Receipt();
                     newReceipt.Name = upload.FileName;
 
-                    // Creates a path to wwwroot\userReceipts for the receipt to be stored
+                    // Creates a path to wwwroot\userReceipts for the image to be stored
                     var ImagePath = @"userReceipts\";
                     var RelativeImagePath = ImagePath + upload.FileName;
                     var AbsImagePath = Path.Combine(wwwrootPath, RelativeImagePath);
 
                     newReceipt.Path = AbsImagePath;
 
-                    // Stores the receipt in wwwroot\userReceipts
+                    // Stores the image file in wwwroot\userReceipts
                     using (var fileStream = new FileStream(AbsImagePath, FileMode.Create))
                     {
                         upload.CopyTo(fileStream);
@@ -63,7 +63,7 @@ namespace PaychexReceiptOCR.Controllers
                 }
             }
 
-            // Gives the path to the OCRRead method
+            // Gives the receipts list to the OCRRead method
             return OCRRead(receipts);
         }
 
@@ -74,9 +74,11 @@ namespace PaychexReceiptOCR.Controllers
             // Used to locate the tessdata folder
             string contentRootPath = _env.ContentRootPath;
 
+            // Iterates through the receipts and reads the associated images
+            // Stores the readings in the receipts variables
             foreach (Receipt receipt in model)
             {
-                // Holds the text data read from tesseract
+                // Holds the iterated text data read from tesseract
                 List<string> output = new List<string>();
 
                 try
@@ -90,7 +92,7 @@ namespace PaychexReceiptOCR.Controllers
                             // Reads receipt
                             using (var page = engine.Process(img))
                             {
-                                // Adds data to model
+                                // Adds reading to receipt
                                 receipt.RawText = page.GetText();
                                 receipt.MeanConfidence = page.GetMeanConfidence();
 
@@ -153,11 +155,11 @@ namespace PaychexReceiptOCR.Controllers
                     output.Add(e.ToString());
                 };
 
-                // Add iterated text to model 
+                // Add iterated text to receipt model
                 receipt.IteratedText = output;
             }
 
-            // Passes model to Post view
+            // Passes List of receipts to Post view
             return View(model);
         }
     }
