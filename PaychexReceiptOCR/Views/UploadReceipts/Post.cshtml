@@ -5,16 +5,26 @@
     <title>Receipt Data</title>
 </head>
 <body>
-    <h3>Mean Confidence: @Model.MeanConfidence</h3>
-    <br />
-    <h3>Raw Text:</h3>
-    <br />
-    <p>@Model.RawText</p>
-    <br />
-    <h3>Iterated Text: </h3>
-    @foreach (string line in Model.IteratedText)
-    {
-        <p>@line</p>
-    }
+    <div class="card-deck">
+        <div class="card m-3">
+            <div class="card-header">
+                <h3>@Model.Name</h3>
+            </div>
+            <img class="card-img-top" src="~/userReceipts/@Model.Name" alt="Receipt Image" />
+            <div class="card-body">
+                <h3>Mean Confidence: @Model.MeanConfidence</h3>
+                <br />
+                <h3>Raw Text:</h3>
+                <br />
+                <p>@Model.RawText</p>
+                <br />
+                <h3>Iterated Text: </h3>
+                @foreach (string line in Model.IteratedText)
+                {
+                    <p>@line</p>
+                }
+            </div>
+        </div>
+    </div>
 </body>
 </html>

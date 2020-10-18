@@ -53,14 +53,15 @@ namespace PaychexReceiptOCR.Controllers
             }
 
             // Gives the path to the OCRRead method
-            return OCRRead(AbsImagePath);
+            return OCRRead(AbsImagePath, receipts[0].FileName);
         }
 
         [HttpPost]
-        public IActionResult OCRRead(string filePath)
+        public IActionResult OCRRead(string filePath, string fileName)
         {
             // User receipt model used to store the data which is passed to the view
             Receipt model = new Receipt();
+            model.Name = fileName;
 
             // Used to locate the tessdata folder
             string contentRootPath = _env.ContentRootPath;
