@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PaychexReceiptOCR.Models;
 using Tesseract;
+using System.Text.RegularExpressions;
 
 namespace PaychexReceiptOCR.Controllers
 {
@@ -157,7 +158,11 @@ namespace PaychexReceiptOCR.Controllers
 
                 // Add iterated text to receipt model
                 receipt.IteratedText = output;
+
+
             }
+
+
 
             // Passes List of receipts to Post view
             return View(model);
