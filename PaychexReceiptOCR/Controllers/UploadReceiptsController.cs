@@ -159,7 +159,19 @@ namespace PaychexReceiptOCR.Controllers
                 // Add iterated text to receipt model
                 receipt.IteratedText = output;
 
+                // Demo of Basic Regex Parsing
+                Regex rxTotalCost = new Regex(@"(?<=Total Price: )\S+");
+                receipt.TotalCost = rxTotalCost.Match(receipt.RawText).ToString();
 
+                Regex rxDate = new Regex(@"(?<=Date of Purchase: )\w+\s\d+\W\s\d+");
+                receipt.Date = rxDate.Match(receipt.RawText).ToString();
+
+
+                // Regex rxCard = new Regex(@"(?<=Date of Purchase: )\S+");
+                // receipt.Date = rxDate.Match(receipt.RawText).ToString();
+
+                Regex rxTicketNumber = new Regex(@"(?<=Ti[c(]ket Number: )\d+");
+                receipt.TicketNumber = rxTicketNumber.Match(receipt.RawText).ToString();
             }
 
 
