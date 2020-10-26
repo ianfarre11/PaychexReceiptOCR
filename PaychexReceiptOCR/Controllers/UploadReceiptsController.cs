@@ -179,5 +179,12 @@ namespace PaychexReceiptOCR.Controllers
             // Passes List of receipts to Post view
             return View(model);
         }
+
+        // Identifys if receipt is from Starbucks, Walmart, WaffleHouse, or other 
+        static string IdentifyVendor(string rawText)
+        {
+
+            return ("Please Compile");
+        }
     }
 }
