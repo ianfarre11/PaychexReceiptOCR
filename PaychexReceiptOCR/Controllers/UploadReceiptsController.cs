@@ -145,14 +145,13 @@ namespace PaychexReceiptOCR.Controllers
                             // int im1Height = img1.Height;
                             // int img2Height = img1.Width;
 
-                            Image img1Better = FixedSize((Image)img1, 100, 300);
+                            Debug.WriteLine(img1.Width + " " + img1.Height);
+
+                            Image img1Better = FixedSize((Image)img1, img1.Width + 500, img1.Height + 500);
                             string wwwrootPath = _env.WebRootPath;
                             var ImagePath = @"userReceipts\";
                             var RelativeImagePath = ImagePath + "img1Better";
                             var AbsImagePath = Path.Combine(wwwrootPath, RelativeImagePath);
-
-
-
 
                             using (var fileStream = new FileStream(AbsImagePath, FileMode.Create))
                             {
