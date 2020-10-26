@@ -10,11 +10,15 @@ using Microsoft.AspNetCore.Mvc;
 using PaychexReceiptOCR.Models;
 using Tesseract;
 using System.Text.RegularExpressions;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 
 namespace PaychexReceiptOCR.Controllers
 {
     public class UploadReceiptsController : Controller
     {
+        
         private readonly IWebHostEnvironment _env;
 
         public UploadReceiptsController(IWebHostEnvironment env)
@@ -68,6 +72,68 @@ namespace PaychexReceiptOCR.Controllers
             return OCRRead(receipts);
         }
 
+        static Image FixedSize(Image imgPhoto, int Width, int Height)
+        {
+            int sourceWidth = imgPhoto.Width;
+            int sourceHeight = imgPhoto.Height;
+            int sourceX = 0;
+            int sourceY = 0;
+            int destX = 0;
+            int destY = 0;
+
+            float nPercent = 0;
+            float nPercentW = 0;
+            float nPercentH = 0;
+
+            nPercentW = ((float)Width / (float)sourceWidth);
+            nPercentH = ((float)Height / (float)sourceHeight);
+            if (nPercentH < nPercentW)
+            {
+                nPercent = nPercentH;
+                destX = System.Convert.ToInt16((Width -
+                              (sourceWidth * nPercent)) / 2);
+            }
+            else
+            {
+                nPercent = nPercentW;
+                destY = System.Convert.ToInt16((Height -
+                              (sourceHeight * nPercent)) / 2);
+            }
+
+            int destWidth = (int)(sourceWidth * nPercent);
+            int destHeight = (int)(sourceHeight * nPercent);
+
+            Bitmap bmPhoto = new Bitmap(Width, Height,
+                              PixelFormat.Format24bppRgb);
+            bmPhoto.SetResolution(imgPhoto.HorizontalResolution,
+                             imgPhoto.VerticalResolution);
+
+            Graphics grPhoto = Graphics.FromImage(bmPhoto);
+            grPhoto.Clear(Color.Red);
+            grPhoto.InterpolationMode =
+                    InterpolationMode.HighQualityBicubic;
+
+            grPhoto.DrawImage(imgPhoto,
+                new Rectangle(destX, destY, destWidth, destHeight),
+                new Rectangle(sourceX, sourceY, sourceWidth, sourceHeight),
+                GraphicsUnit.Pixel);
+
+            grPhoto.Dispose();
+            return bmPhoto;
+        }
+
+        public static bool IsPhoto(string fileName)
+        {
+            var list = ".jpg";
+            var filename = fileName.ToLower();
+            bool isThere = false;
+              if (filename.EndsWith(list))
+                {
+                    isThere = true;
+                }
+            return isThere;
+        }
+
         [HttpPost]
         public IActionResult OCRRead(List<Receipt> model)
         {
@@ -87,65 +153,89 @@ namespace PaychexReceiptOCR.Controllers
                     // Creates engine
                     using (var engine = new TesseractEngine(contentRootPath, "eng", EngineMode.Default))
                     {
-                        // Loads receipt as Tesseract.Pix instance
-                        using (var img = Pix.LoadFromFile(receipt.Path))
+                        using (var img1 = new Bitmap(receipt.Path))
                         {
-                            // Reads receipt
-                            using (var page = engine.Process(img))
+                            if(IsPhoto(receipt.Path) == true)
                             {
-                                // Adds reading to receipt
-                                receipt.RawText = page.GetText();
-                                receipt.MeanConfidence = page.GetMeanConfidence();
+                                img1.RotateFlip(RotateFlipType.Rotate90FlipX);
+                                img1.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                                Debug.WriteLine("The Image Flipped");
+                            }
+                           
 
-                                // Redirects console ouput to a string
-                                var sw = new StringWriter();
-                                Console.SetOut(sw);
-                                Console.SetError(sw);
+                            Debug.WriteLine(img1.Width + " " + img1.Height);
+                            
+                            Image img1Better = FixedSize((Image)img1, img1.Width *2, img1.Height *2);
+                            string wwwrootPath = _env.WebRootPath;
+                            var ImagePath = @"userReceipts\";
+                            var RelativeImagePath = ImagePath + "img1Better";
+                            var AbsImagePath = Path.Combine(wwwrootPath, RelativeImagePath);
 
-                                // Iterates through the tesseract page  
-                                using (var iter = page.GetIterator())
+                            using (var fileStream = new FileStream(AbsImagePath, FileMode.Create))
+                            {
+                                img1Better.Save(fileStream, System.Drawing.Imaging.ImageFormat.Png);
+                            }
+
+                            // Loads receipt as Tesseract.Pix instance
+                            using (var img = Pix.LoadFromFile(AbsImagePath))
+                            {
+                                // Reads receipt
+                                using (var page = engine.Process(img))
                                 {
-                                    iter.Begin();
+                                    // Adds reading to receipt
+                                    receipt.RawText = page.GetText();
+                                    receipt.MeanConfidence = page.GetMeanConfidence();
 
-                                    do
+                                    // Redirects console ouput to a string
+                                    var sw = new StringWriter();
+                                    Console.SetOut(sw);
+                                    Console.SetError(sw);
+
+                                    // Iterates through the tesseract page  
+                                    using (var iter = page.GetIterator())
                                     {
+                                        iter.Begin();
+
                                         do
                                         {
                                             do
                                             {
                                                 do
                                                 {
-                                                    if (iter.IsAtBeginningOf(PageIteratorLevel.Block))
+                                                    do
                                                     {
-                                                        // Whenever a new BLOCK it iterated, the current StringWriter contents are added to the the ouput
-                                                        // and a new StringWriter object in instantiated in place of the old one
-                                                        output.Add(sw.ToString());
-                                                        sw = new StringWriter();
-                                                        Console.SetOut(sw);
-                                                        Console.SetError(sw);
-                                                    }
+                                                        if (iter.IsAtBeginningOf(PageIteratorLevel.Block))
+                                                        {
+                                                            // Whenever a new BLOCK it iterated, the current StringWriter contents are added to the the ouput
+                                                            // and a new StringWriter object in instantiated in place of the old one
+                                                            output.Add(sw.ToString());
+                                                            sw = new StringWriter();
+                                                            Console.SetOut(sw);
+                                                            Console.SetError(sw);
+                                                        }
 
-                                                    Console.Write(iter.GetText(PageIteratorLevel.Word));
-                                                    Console.Write(" ");
+                                                        Console.Write(iter.GetText(PageIteratorLevel.Word));
+                                                        Console.Write(" ");
 
-                                                    if (iter.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word))
+                                                        if (iter.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word))
+                                                        {
+                                                            Console.WriteLine("");
+                                                        }
+                                                    } while (iter.Next(PageIteratorLevel.TextLine, PageIteratorLevel.Word));
+
+                                                    if (iter.IsAtFinalOf(PageIteratorLevel.Para, PageIteratorLevel.TextLine))
                                                     {
                                                         Console.WriteLine("");
                                                     }
-                                                } while (iter.Next(PageIteratorLevel.TextLine, PageIteratorLevel.Word));
+                                                } while (iter.Next(PageIteratorLevel.Para, PageIteratorLevel.TextLine));
+                                            } while (iter.Next(PageIteratorLevel.Block, PageIteratorLevel.Para));
+                                        } while (iter.Next(PageIteratorLevel.Block));
+                                    }
 
-                                                if (iter.IsAtFinalOf(PageIteratorLevel.Para, PageIteratorLevel.TextLine))
-                                                {
-                                                    Console.WriteLine("");
-                                                }
-                                            } while (iter.Next(PageIteratorLevel.Para, PageIteratorLevel.TextLine));
-                                        } while (iter.Next(PageIteratorLevel.Block, PageIteratorLevel.Para));
-                                    } while (iter.Next(PageIteratorLevel.Block));
+                                    output.Add(sw.ToString());
                                 }
-
-                                output.Add(sw.ToString());
                             }
-                        }
+                            }
                     }
                 }
                 catch (Exception e)
