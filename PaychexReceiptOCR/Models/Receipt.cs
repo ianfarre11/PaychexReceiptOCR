@@ -24,5 +24,7 @@ namespace PaychexReceiptOCR.Models
         public string TicketNumber { get; set; }
 
         public string CardNumber { get; set; }
+
+        public string Vender { get; set; }
     }
 }

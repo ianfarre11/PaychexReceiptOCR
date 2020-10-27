@@ -249,19 +249,57 @@ namespace PaychexReceiptOCR.Controllers
                 // Add iterated text to receipt model
                 receipt.IteratedText = output;
 
-                // Demo of Basic Regex Parsing
-                Regex rxTotalCost = new Regex(@"(?<=Total Price: )\S+");
-                receipt.TotalCost = rxTotalCost.Match(receipt.RawText).ToString();
+                // Identifys the Vender
+                receipt.Vender = IdentifyVendor(receipt.RawText);
 
-                Regex rxDate = new Regex(@"(?<=Date of Purchase: )\w+\s\d+\W\s\d+");
-                receipt.Date = rxDate.Match(receipt.RawText).ToString();
+                // This section is incomplete but the idea is that a different series of regex operations will
+                // occur depending on the Vender
 
+                if (receipt.Vender == "Walmart")
+                {
+                    // Demo of Basic Regex Parsing
+                    Regex rxTotalCost = new Regex(@"(?<=Total Price: )\S+");
+                    receipt.TotalCost = rxTotalCost.Match(receipt.RawText).ToString();
 
-                // Regex rxCard = new Regex(@"(?<=Date of Purchase: )\S+");
-                // receipt.Date = rxDate.Match(receipt.RawText).ToString();
+                    Regex rxDate = new Regex(@"(?<=Date of Purchase: )\w+\s\d+\W\s\d+");
+                    receipt.Date = rxDate.Match(receipt.RawText).ToString();
 
-                Regex rxTicketNumber = new Regex(@"(?<=Ti[c(]ket Number: )\d+");
-                receipt.TicketNumber = rxTicketNumber.Match(receipt.RawText).ToString();
+                    Regex rxTicketNumber = new Regex(@"(?<=Ti[c(]ket Number: )\d+");
+                    receipt.TicketNumber = rxTicketNumber.Match(receipt.RawText).ToString();
+                } else if (receipt.Vender == "Starbucks")
+                {
+                    // Demo of Basic Regex Parsing
+                    Regex rxTotalCost = new Regex(@"(?<=Total Price: )\S+");
+                    receipt.TotalCost = rxTotalCost.Match(receipt.RawText).ToString();
+
+                    Regex rxDate = new Regex(@"(?<=Date of Purchase: )\w+\s\d+\W\s\d+");
+                    receipt.Date = rxDate.Match(receipt.RawText).ToString();
+
+                    Regex rxTicketNumber = new Regex(@"(?<=Ti[c(]ket Number: )\d+");
+                    receipt.TicketNumber = rxTicketNumber.Match(receipt.RawText).ToString();
+                } else if (receipt.Vender == "Waffle House")
+                {
+                    // Demo of Basic Regex Parsing
+                    Regex rxTotalCost = new Regex(@"(?<=Total Price: )\S+");
+                    receipt.TotalCost = rxTotalCost.Match(receipt.RawText).ToString();
+
+                    Regex rxDate = new Regex(@"(?<=Date of Purchase: )\w+\s\d+\W\s\d+");
+                    receipt.Date = rxDate.Match(receipt.RawText).ToString();
+
+                    Regex rxTicketNumber = new Regex(@"(?<=Ti[c(]ket Number: )\d+");
+                    receipt.TicketNumber = rxTicketNumber.Match(receipt.RawText).ToString();
+                } else
+                {
+                    // Demo of Basic Regex Parsing
+                    Regex rxTotalCost = new Regex(@"(?<=Total Price: )\S+");
+                    receipt.TotalCost = rxTotalCost.Match(receipt.RawText).ToString();
+
+                    Regex rxDate = new Regex(@"(?<=Date of Purchase: )\w+\s\d+\W\s\d+");
+                    receipt.Date = rxDate.Match(receipt.RawText).ToString();
+
+                    Regex rxTicketNumber = new Regex(@"(?<=Ti[c(]ket Number: )\d+");
+                    receipt.TicketNumber = rxTicketNumber.Match(receipt.RawText).ToString();
+                }
             }
 
 
@@ -269,12 +307,105 @@ namespace PaychexReceiptOCR.Controllers
             // Passes List of receipts to Post view
             return View(model);
         }
-
         // Identifys if receipt is from Starbucks, Walmart, WaffleHouse, or other 
         static string IdentifyVendor(string rawText)
         {
+            int WaffleHouseCount = 0;
+            int WalmartCount = 0;
+            int StarbucksCount = 0;
 
-            return ("Please Compile");
+            // Possible matches for WaffleHouse
+            Regex rgx = new Regex(@"Entry Mode[!l]");
+            if (rgx.IsMatch(rawText))
+            {
+                WaffleHouseCount += 2;
+            }
+
+            rgx = new Regex(@"Batch [8#][!:]");
+            if (rgx.IsMatch(rawText))
+            {
+                WaffleHouseCount += 2;
+            }
+
+            rgx = new Regex(@"FFLE HOUSE");
+            if (rgx.IsMatch(rawText))
+            {
+                WaffleHouseCount += 3;
+            }
+
+            rgx = new Regex(@"PRE-TIP \w\wt");
+            if (rgx.IsMatch(rawText))
+            {
+                WaffleHouseCount += 2;
+            }
+
+            // Possible matches for Walmart
+            rgx = new Regex(@"ITEMS SOLD");
+            if (rgx.IsMatch(rawText))
+            {
+                WalmartCount++;
+            }
+
+            rgx = new Regex(@"\*\*\*Cust\w\w\w\w \w\wpy\*\*\*");
+            if (rgx.IsMatch(rawText))
+            {
+                WalmartCount++;
+            }
+
+            rgx = new Regex(@"Save money");
+            if (rgx.IsMatch(rawText))
+            {
+                WalmartCount += 2;
+            }
+
+            rgx = new Regex(@"Live better");
+            if (rgx.IsMatch(rawText))
+            {
+                WalmartCount += 2;
+            }
+
+            // Possible matches for Starbucks
+            rgx = new Regex(@"In\woice");
+            if (rgx.IsMatch(rawText))
+            {
+                StarbucksCount++;
+            }
+
+            rgx = new Regex(@"CREDIT C\w\wD");
+            if (rgx.IsMatch(rawText))
+            {
+                StarbucksCount++;
+            }
+
+            rgx = new Regex(@"TOT\wL");
+            if (rgx.IsMatch(rawText))
+            {
+                StarbucksCount++;
+            }
+
+            rgx = new Regex(@"PRE-TIP");
+            if (rgx.IsMatch(rawText))
+            {
+                StarbucksCount++;
+            }
+
+            int maxcount = Math.Max(Math.Max(WaffleHouseCount, WalmartCount), StarbucksCount);
+            if (maxcount == WaffleHouseCount)
+            {
+                return ("Waffle House");
+            }
+            else if (maxcount == WalmartCount)
+            {
+                return ("Walmart");
+            }
+            else if (maxcount == StarbucksCount)
+            {
+                return ("Starbucks");
+            }
+            else
+            {
+                return ("Error");
+            }
         }
     }
 }
