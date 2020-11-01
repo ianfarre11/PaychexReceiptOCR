@@ -73,15 +73,25 @@ namespace PaychexReceiptOCR.Controllers
 
         public void ImageOrient(string path)
         {
-            // Read from file
-            using MagickImage image = new MagickImage(path);
-            image.AutoOrient();
+            try
+            {
+                // Read from file
+                using MagickImage image = new MagickImage(path);
+                image.AutoOrient();
 
-            image.Format = MagickFormat.Png;
-            // Save the result
-            image.Write(path);
+                image.Format = MagickFormat.Png;
+                // Save the result
+                image.Write(path);
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError(e.ToString());
+                Debug.Write("Unexpected Error: " + e.Message);
+                Debug.Write("Details: ");
+                Debug.Write(e.ToString());
+            };
         }
-
+        
         [HttpPost]
         public IActionResult OCRRead(List<Receipt> model)
         {
