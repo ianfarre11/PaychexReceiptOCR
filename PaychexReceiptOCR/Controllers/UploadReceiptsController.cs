@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PaychexReceiptOCR.Models;
 using Tesseract;
+using ImageMagick;
 
 namespace PaychexReceiptOCR.Controllers
 {
@@ -59,6 +60,9 @@ namespace PaychexReceiptOCR.Controllers
                         upload.CopyTo(fileStream);
                     }
 
+                    // Fixes orientation on images
+                    ImageOrient(AbsImagePath);
+
                     receipts.Add(newReceipt);
                 }
             }
@@ -67,6 +71,27 @@ namespace PaychexReceiptOCR.Controllers
             return OCRRead(receipts);
         }
 
+        public void ImageOrient(string path)
+        {
+            try
+            {
+                // Read from file
+                using MagickImage image = new MagickImage(path);
+                image.AutoOrient();
+
+                image.Format = MagickFormat.Png;
+                // Save the result
+                image.Write(path);
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError(e.ToString());
+                Debug.Write("Unexpected Error: " + e.Message);
+                Debug.Write("Details: ");
+                Debug.Write(e.ToString());
+            };
+        }
+        
         [HttpPost]
         public IActionResult OCRRead(List<Receipt> model)
         {
