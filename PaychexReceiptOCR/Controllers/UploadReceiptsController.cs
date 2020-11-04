@@ -13,6 +13,7 @@ using System.Text.RegularExpressions;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using ImageMagick;
 
 namespace PaychexReceiptOCR.Controllers
 {
@@ -63,7 +64,8 @@ namespace PaychexReceiptOCR.Controllers
                     {
                         upload.CopyTo(fileStream);
                     }
-
+                    //Fixes rotation issues and converts PDFs to images
+                    ImageOrient(newReceipt.Path);
                     receipts.Add(newReceipt);
                 }
             }
@@ -72,66 +74,50 @@ namespace PaychexReceiptOCR.Controllers
             return OCRRead(receipts);
         }
 
-        static Image FixedSize(Image imgPhoto, int Width, int Height)
+        public void ImageOrient(string path)
         {
-            int sourceWidth = imgPhoto.Width;
-            int sourceHeight = imgPhoto.Height;
-            int sourceX = 0;
-            int sourceY = 0;
-            int destX = 0;
-            int destY = 0;
-
-            float nPercent = 0;
-            float nPercentW = 0;
-            float nPercentH = 0;
-
-            nPercentW = ((float)Width / (float)sourceWidth);
-            nPercentH = ((float)Height / (float)sourceHeight);
-            if (nPercentH < nPercentW)
+            // Get the extension of the uploaded file.
+            string extension = System.IO.Path.GetExtension(path);
+            //Check whether file is PDF
+            if (extension == ".pdf")
             {
-                nPercent = nPercentH;
-                destX = System.Convert.ToInt16((Width -
-                              (sourceWidth * nPercent)) / 2);
+                ConvertPdf(path);
             }
-            else
-            {
-                nPercent = nPercentW;
-                destY = System.Convert.ToInt16((Height -
-                              (sourceHeight * nPercent)) / 2);
-            }
-
-            int destWidth = (int)(sourceWidth * nPercent);
-            int destHeight = (int)(sourceHeight * nPercent);
-
-            Bitmap bmPhoto = new Bitmap(Width, Height,
-                              PixelFormat.Format24bppRgb);
-            bmPhoto.SetResolution(imgPhoto.HorizontalResolution,
-                             imgPhoto.VerticalResolution);
-
-            Graphics grPhoto = Graphics.FromImage(bmPhoto);
-            grPhoto.Clear(Color.Red);
-            grPhoto.InterpolationMode =
-                    InterpolationMode.HighQualityBicubic;
-
-            grPhoto.DrawImage(imgPhoto,
-                new Rectangle(destX, destY, destWidth, destHeight),
-                new Rectangle(sourceX, sourceY, sourceWidth, sourceHeight),
-                GraphicsUnit.Pixel);
-
-            grPhoto.Dispose();
-            return bmPhoto;
+            using MagickImage image = new MagickImage(path);
+            //Automatically orients the file correctly
+            image.AutoOrient();
+            
+            image.Format = MagickFormat.Png;
+            // Save the result
+            image.Write(path);
         }
 
-        public static bool IsPhoto(string fileName)
+        public void ConvertPdf(string path)
         {
-            var list = ".jpg";
-            var filename = fileName.ToLower();
-            bool isThere = false;
-              if (filename.EndsWith(list))
+            MagickNET.SetGhostscriptDirectory(@"C:\Users\sf14\Source\Repos\PaychexReceiptOCR\PaychexReceiptOCR\gs9.53.3\bin");
+            var settings = new MagickReadSettings();
+            // Setting the density to 300 dpi will create an image with a better quality
+            settings.Density = new Density(300);
+
+            using (var images = new MagickImageCollection())
+            {
+                // Add all the pages of the pdf file to the collection
+                images.Read(path, settings);
+
+                // Create new image that appends all the pages horizontally
+                using (var horizontal = images.AppendHorizontally())
                 {
-                    isThere = true;
+                    // Save result as a png
+                    horizontal.Write(path + ".png");
                 }
-            return isThere;
+
+                // Create new image that appends all the pages vertically
+                using (var vertical = images.AppendVertically())
+                {
+                    // Save result as a png
+                    vertical.Write(path + ".png");
+                }
+            }
         }
 
         [HttpPost]
@@ -153,89 +139,65 @@ namespace PaychexReceiptOCR.Controllers
                     // Creates engine
                     using (var engine = new TesseractEngine(contentRootPath, "eng", EngineMode.Default))
                     {
-                        using (var img1 = new Bitmap(receipt.Path))
+                        // Loads receipt as Tesseract.Pix instance
+                        using (var img = Pix.LoadFromFile(receipt.Path))
                         {
-                            if(IsPhoto(receipt.Path) == true)
+                            // Reads receipt
+                            using (var page = engine.Process(img))
                             {
-                                img1.RotateFlip(RotateFlipType.Rotate90FlipX);
-                                img1.RotateFlip(RotateFlipType.RotateNoneFlipX);
-                                Debug.WriteLine("The Image Flipped");
-                            }
-                           
+                                // Adds reading to receipt
+                                receipt.RawText = page.GetText();
+                                receipt.MeanConfidence = page.GetMeanConfidence();
 
-                            Debug.WriteLine(img1.Width + " " + img1.Height);
-                            
-                            Image img1Better = FixedSize((Image)img1, img1.Width *2, img1.Height *2);
-                            string wwwrootPath = _env.WebRootPath;
-                            var ImagePath = @"userReceipts\";
-                            var RelativeImagePath = ImagePath + "img1Better";
-                            var AbsImagePath = Path.Combine(wwwrootPath, RelativeImagePath);
+                                // Redirects console ouput to a string
+                                var sw = new StringWriter();
+                                Console.SetOut(sw);
+                                Console.SetError(sw);
 
-                            using (var fileStream = new FileStream(AbsImagePath, FileMode.Create))
-                            {
-                                img1Better.Save(fileStream, System.Drawing.Imaging.ImageFormat.Png);
-                            }
-
-                            // Loads receipt as Tesseract.Pix instance
-                            using (var img = Pix.LoadFromFile(AbsImagePath))
-                            {
-                                // Reads receipt
-                                using (var page = engine.Process(img))
+                                // Iterates through the tesseract page  
+                                using (var iter = page.GetIterator())
                                 {
-                                    // Adds reading to receipt
-                                    receipt.RawText = page.GetText();
-                                    receipt.MeanConfidence = page.GetMeanConfidence();
+                                    iter.Begin();
 
-                                    // Redirects console ouput to a string
-                                    var sw = new StringWriter();
-                                    Console.SetOut(sw);
-                                    Console.SetError(sw);
-
-                                    // Iterates through the tesseract page  
-                                    using (var iter = page.GetIterator())
+                                    do
                                     {
-                                        iter.Begin();
-
                                         do
                                         {
                                             do
                                             {
                                                 do
                                                 {
-                                                    do
+                                                    if (iter.IsAtBeginningOf(PageIteratorLevel.Block))
                                                     {
-                                                        if (iter.IsAtBeginningOf(PageIteratorLevel.Block))
-                                                        {
-                                                            // Whenever a new BLOCK it iterated, the current StringWriter contents are added to the the ouput
-                                                            // and a new StringWriter object in instantiated in place of the old one
-                                                            output.Add(sw.ToString());
-                                                            sw = new StringWriter();
-                                                            Console.SetOut(sw);
-                                                            Console.SetError(sw);
-                                                        }
+                                                        // Whenever a new BLOCK it iterated, the current StringWriter contents are added to the the ouput
+                                                        // and a new StringWriter object in instantiated in place of the old one
+                                                        output.Add(sw.ToString());
+                                                        sw = new StringWriter();
+                                                        Console.SetOut(sw);
+                                                        Console.SetError(sw);
+                                                    }
 
-                                                        Console.Write(iter.GetText(PageIteratorLevel.Word));
-                                                        Console.Write(" ");
+                                                    Console.Write(iter.GetText(PageIteratorLevel.Word));
+                                                    Console.Write(" ");
 
-                                                        if (iter.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word))
-                                                        {
-                                                            Console.WriteLine("");
-                                                        }
-                                                    } while (iter.Next(PageIteratorLevel.TextLine, PageIteratorLevel.Word));
-
-                                                    if (iter.IsAtFinalOf(PageIteratorLevel.Para, PageIteratorLevel.TextLine))
+                                                    if (iter.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word))
                                                     {
                                                         Console.WriteLine("");
                                                     }
-                                                } while (iter.Next(PageIteratorLevel.Para, PageIteratorLevel.TextLine));
-                                            } while (iter.Next(PageIteratorLevel.Block, PageIteratorLevel.Para));
-                                        } while (iter.Next(PageIteratorLevel.Block));
-                                    }
+                                                } while (iter.Next(PageIteratorLevel.TextLine, PageIteratorLevel.Word));
 
-                                    output.Add(sw.ToString());
+                                                if (iter.IsAtFinalOf(PageIteratorLevel.Para, PageIteratorLevel.TextLine))
+                                                {
+                                                    Console.WriteLine("");
+                                                }
+                                            } while (iter.Next(PageIteratorLevel.Para, PageIteratorLevel.TextLine));
+                                        } while (iter.Next(PageIteratorLevel.Block, PageIteratorLevel.Para));
+                                    } while (iter.Next(PageIteratorLevel.Block));
                                 }
+
+                                output.Add(sw.ToString());
                             }
-                            }
+                        }
                     }
                 }
                 catch (Exception e)
@@ -251,160 +213,71 @@ namespace PaychexReceiptOCR.Controllers
 
                 // Identifys the Vender
                 receipt.Vender = IdentifyVendor(receipt.RawText);
-
-                // This section is incomplete but the idea is that a different series of regex operations will
-                // occur depending on the Vender
-
-                if (receipt.Vender == "Walmart")
-                {
-                    // Demo of Basic Regex Parsing
-                    Regex rxTotalCost = new Regex(@"(?<=Total Price: )\S+");
-                    receipt.TotalCost = rxTotalCost.Match(receipt.RawText).ToString();
-
-                    Regex rxDate = new Regex(@"(?<=Date of Purchase: )\w+\s\d+\W\s\d+");
-                    receipt.Date = rxDate.Match(receipt.RawText).ToString();
-
-                    Regex rxTicketNumber = new Regex(@"(?<=Ti[c(]ket Number: )\d+");
-                    receipt.TicketNumber = rxTicketNumber.Match(receipt.RawText).ToString();
-                } else if (receipt.Vender == "Starbucks")
-                {
-                    // Demo of Basic Regex Parsing
-                    Regex rxTotalCost = new Regex(@"(?<=Total Price: )\S+");
-                    receipt.TotalCost = rxTotalCost.Match(receipt.RawText).ToString();
-
-                    Regex rxDate = new Regex(@"(?<=Date of Purchase: )\w+\s\d+\W\s\d+");
-                    receipt.Date = rxDate.Match(receipt.RawText).ToString();
-
-                    Regex rxTicketNumber = new Regex(@"(?<=Ti[c(]ket Number: )\d+");
-                    receipt.TicketNumber = rxTicketNumber.Match(receipt.RawText).ToString();
-                } else if (receipt.Vender == "Waffle House")
-                {
-                    // Demo of Basic Regex Parsing
-                    Regex rxTotalCost = new Regex(@"(?<=Total Price: )\S+");
-                    receipt.TotalCost = rxTotalCost.Match(receipt.RawText).ToString();
-
-                    Regex rxDate = new Regex(@"(?<=Date of Purchase: )\w+\s\d+\W\s\d+");
-                    receipt.Date = rxDate.Match(receipt.RawText).ToString();
-
-                    Regex rxTicketNumber = new Regex(@"(?<=Ti[c(]ket Number: )\d+");
-                    receipt.TicketNumber = rxTicketNumber.Match(receipt.RawText).ToString();
-                } else
-                {
-                    // Demo of Basic Regex Parsing
-                    Regex rxTotalCost = new Regex(@"(?<=Total Price: )\S+");
-                    receipt.TotalCost = rxTotalCost.Match(receipt.RawText).ToString();
-
-                    Regex rxDate = new Regex(@"(?<=Date of Purchase: )\w+\s\d+\W\s\d+");
-                    receipt.Date = rxDate.Match(receipt.RawText).ToString();
-
-                    Regex rxTicketNumber = new Regex(@"(?<=Ti[c(]ket Number: )\d+");
-                    receipt.TicketNumber = rxTicketNumber.Match(receipt.RawText).ToString();
-                }
             }
-
-
-
             // Passes List of receipts to Post view
             return View(model);
         }
-        // Identifys if receipt is from Starbucks, Walmart, WaffleHouse, or other 
+
+        // Identifies if receipt is from Starbucks, Walmart, WaffleHouse, or other 
         static string IdentifyVendor(string rawText)
         {
             int WaffleHouseCount = 0;
             int WalmartCount = 0;
             int StarbucksCount = 0;
-
-            // Possible matches for WaffleHouse
-            Regex rgx = new Regex(@"Entry Mode[!l]");
-            if (rgx.IsMatch(rawText))
+            
+            //Check for Walmart key expressions
+            string[] RegexList = System.IO.File.ReadAllLines(@"C:\Users\sf14\Source\Repos\PaychexReceiptOCR\PaychexReceiptOCR\Properties\Regex\WalmartRegex.txt");
+            for (int i = 0; i < RegexList.Length; i++)
             {
-                WaffleHouseCount += 2;
+                Regex rgx = new Regex(RegexList[i]);
+                if (rgx.IsMatch(rawText))
+                {
+                    WalmartCount = WalmartCount + Int32.Parse(RegexList[i + 1]);
+                }
+                i++;
             }
 
-            rgx = new Regex(@"Batch [8#][!:]");
-            if (rgx.IsMatch(rawText))
+            //Check for Waffle House key expressions
+            RegexList = System.IO.File.ReadAllLines(@"C:\Users\sf14\Source\Repos\PaychexReceiptOCR\PaychexReceiptOCR\Properties\Regex\WaffleHouseRegex.txt");
+            for (int i = 0; i < RegexList.Length; i++)
             {
-                WaffleHouseCount += 2;
+                Regex rgx = new Regex(RegexList[i]);
+                if (rgx.IsMatch(rawText))
+                {
+                    WaffleHouseCount = WaffleHouseCount + Int32.Parse(RegexList[i + 1]);
+                }
+                i++;
             }
 
-            rgx = new Regex(@"FFLE HOUSE");
-            if (rgx.IsMatch(rawText))
+            //Check for Starbucks key expressions
+            RegexList = System.IO.File.ReadAllLines(@"C:\Users\sf14\Source\Repos\PaychexReceiptOCR\PaychexReceiptOCR\Properties\Regex\StarbucksRegex.txt");
+            for (int i = 0; i < RegexList.Length; i++)
             {
-                WaffleHouseCount += 3;
+                Regex rgx = new Regex(RegexList[i]);
+                if (rgx.IsMatch(rawText))
+                {
+                    StarbucksCount = StarbucksCount + Int32.Parse(RegexList[i + 1]);
+                }
+                i++;
             }
-
-            rgx = new Regex(@"PRE-TIP \w\wt");
-            if (rgx.IsMatch(rawText))
-            {
-                WaffleHouseCount += 2;
-            }
-
-            // Possible matches for Walmart
-            rgx = new Regex(@"ITEMS SOLD");
-            if (rgx.IsMatch(rawText))
-            {
-                WalmartCount++;
-            }
-
-            rgx = new Regex(@"\*\*\*Cust\w\w\w\w \w\wpy\*\*\*");
-            if (rgx.IsMatch(rawText))
-            {
-                WalmartCount++;
-            }
-
-            rgx = new Regex(@"Save money");
-            if (rgx.IsMatch(rawText))
-            {
-                WalmartCount += 2;
-            }
-
-            rgx = new Regex(@"Live better");
-            if (rgx.IsMatch(rawText))
-            {
-                WalmartCount += 2;
-            }
-
-            // Possible matches for Starbucks
-            rgx = new Regex(@"In\woice");
-            if (rgx.IsMatch(rawText))
-            {
-                StarbucksCount++;
-            }
-
-            rgx = new Regex(@"CREDIT C\w\wD");
-            if (rgx.IsMatch(rawText))
-            {
-                StarbucksCount++;
-            }
-
-            rgx = new Regex(@"TOT\wL");
-            if (rgx.IsMatch(rawText))
-            {
-                StarbucksCount++;
-            }
-
-            rgx = new Regex(@"PRE-TIP");
-            if (rgx.IsMatch(rawText))
-            {
-                StarbucksCount++;
-            }
-
+            
+            //Compare count totals and decide vendor
             int maxcount = Math.Max(Math.Max(WaffleHouseCount, WalmartCount), StarbucksCount);
-            if (maxcount == WaffleHouseCount)
+            if (maxcount == WaffleHouseCount && WaffleHouseCount != 0)
             {
                 return ("Waffle House");
             }
-            else if (maxcount == WalmartCount)
+            else if (maxcount == WalmartCount && WalmartCount != 0)
             {
                 return ("Walmart");
             }
-            else if (maxcount == StarbucksCount)
+            else if (maxcount == StarbucksCount && StarbucksCount != 0)
             {
                 return ("Starbucks");
             }
             else
             {
-                return ("Error");
+                return ("Unknown");
             }
         }
     }
