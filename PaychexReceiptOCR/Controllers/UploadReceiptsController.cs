@@ -94,7 +94,7 @@ namespace PaychexReceiptOCR.Controllers
 
         public void ConvertPdf(string path)
         {
-            MagickNET.SetGhostscriptDirectory(@"C:\Users\sf14\Source\Repos\PaychexReceiptOCR\PaychexReceiptOCR\gs9.53.3\bin");
+            MagickNET.SetGhostscriptDirectory(@"C:\Users\sf14\Source\Repos\PaychexReceiptOCR\PaychexReceiptOCR\gs9.53.3\gsdll");
             var settings = new MagickReadSettings();
             // Setting the density to 300 dpi will create an image with a better quality
             settings.Density = new Density(300);
