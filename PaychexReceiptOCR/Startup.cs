@@ -50,7 +50,7 @@ namespace PaychexReceiptOCR
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=UploadReceipts}/{action=Index}/{id?}");
             });
         }
     }
