@@ -94,7 +94,9 @@ namespace PaychexReceiptOCR.Controllers
 
         public void ConvertPdf(string path)
         {
-            MagickNET.SetGhostscriptDirectory(@"C:\Users\sf14\Source\Repos\PaychexReceiptOCR\PaychexReceiptOCR\gs9.53.3\gsdll");
+            string contentRootPath = _env.ContentRootPath;
+
+            MagickNET.SetGhostscriptDirectory(Path.Combine(contentRootPath + "\\gs9.53.3\\gsdll"));
             var settings = new MagickReadSettings();
             // Setting the density to 300 dpi will create an image with a better quality
             settings.Density = new Density(300);
@@ -212,21 +214,21 @@ namespace PaychexReceiptOCR.Controllers
                 receipt.IteratedText = output;
 
                 // Identifys the Vender
-                receipt.Vender = IdentifyVendor(receipt.RawText);
+                receipt.Vender = IdentifyVendor(receipt.RawText, contentRootPath);
             }
             // Passes List of receipts to Post view
             return View(model);
         }
 
         // Identifies if receipt is from Starbucks, Walmart, WaffleHouse, or other 
-        static string IdentifyVendor(string rawText)
+        static string IdentifyVendor(string rawText, string contentRootPath)
         {
             int WaffleHouseCount = 0;
             int WalmartCount = 0;
             int StarbucksCount = 0;
             
             //Check for Walmart key expressions
-            string[] RegexList = System.IO.File.ReadAllLines(@"C:\Users\sf14\Source\Repos\PaychexReceiptOCR\PaychexReceiptOCR\Properties\Regex\WalmartRegex.txt");
+            string[] RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\Properties\\Regex\\WalmartRegex.txt"));
             for (int i = 0; i < RegexList.Length; i++)
             {
                 Regex rgx = new Regex(RegexList[i]);
@@ -238,7 +240,7 @@ namespace PaychexReceiptOCR.Controllers
             }
 
             //Check for Waffle House key expressions
-            RegexList = System.IO.File.ReadAllLines(@"C:\Users\sf14\Source\Repos\PaychexReceiptOCR\PaychexReceiptOCR\Properties\Regex\WaffleHouseRegex.txt");
+            RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\Properties\\Regex\\WaffleHouseRegex.txt"));
             for (int i = 0; i < RegexList.Length; i++)
             {
                 Regex rgx = new Regex(RegexList[i]);
@@ -250,7 +252,7 @@ namespace PaychexReceiptOCR.Controllers
             }
 
             //Check for Starbucks key expressions
-            RegexList = System.IO.File.ReadAllLines(@"C:\Users\sf14\Source\Repos\PaychexReceiptOCR\PaychexReceiptOCR\Properties\Regex\StarbucksRegex.txt");
+            RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\Properties\\Regex\\StarbucksRegex.txt"));
             for (int i = 0; i < RegexList.Length; i++)
             {
                 Regex rgx = new Regex(RegexList[i]);
