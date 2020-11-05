@@ -52,31 +52,28 @@ namespace PaychexReceiptOCR.Controllers
                     Receipt newReceipt = new Receipt();
                     newReceipt.Name = upload.FileName;
 
-                    // Creates a path to wwwroot\userReceipts for the image to be stored
-                    var ImagePath = @"userReceipts\";
-                    var RelativeImagePath = ImagePath + upload.FileName;
-                    var AbsImagePath = Path.Combine(wwwrootPath, RelativeImagePath);
-
-                    newReceipt.Path = AbsImagePath;
-
-                    // Stores the image file in wwwroot\userReceipts
-                    using (var fileStream = new FileStream(AbsImagePath, FileMode.Create))
+                    if (System.IO.Path.GetExtension(upload.FileName) != ".pdf")
                     {
-                        upload.CopyTo(fileStream);
+                        // Creates a path to wwwroot\userReceipts for the image to be stored
+                        var ImagePath = @"userReceipts\";
+                        var RelativeImagePath = ImagePath + upload.FileName;
+                        var AbsImagePath = Path.Combine(wwwrootPath, RelativeImagePath);
+
+                        newReceipt.Path = AbsImagePath;
+
+                        // Stores the image file in wwwroot\userReceipts
+                        using (var fileStream = new FileStream(AbsImagePath, FileMode.Create))
+                        {
+                            upload.CopyTo(fileStream);
+                        }
+
+                        // Get the extension of the uploaded file.
+                        string extension = System.IO.Path.GetExtension(AbsImagePath);
+
+                        //Fixes rotation issues 
+                        ImageOrient(newReceipt.Path);
+                        receipts.Add(newReceipt);
                     }
-
-                    // Get the extension of the uploaded file.
-                    string extension = System.IO.Path.GetExtension(AbsImagePath);
-
-                    //Check whether file is PDF and converts it to png if it is
-                    if (extension == ".pdf")
-                    {
-                        ConvertPdf(AbsImagePath);
-                    }
-
-                    //Fixes rotation issues 
-                    ImageOrient(newReceipt.Path);
-                    receipts.Add(newReceipt);
                 }
             }
 
@@ -88,44 +85,23 @@ namespace PaychexReceiptOCR.Controllers
         // potential orientation bug from images taken on a cellphone
         public void ImageOrient(string path)
         {
-            using MagickImage image = new MagickImage(path);
-            //Automatically orients the file correctly
-            image.AutoOrient();
-            
-            image.Format = MagickFormat.Png;
-            // Save the result
-            image.Write(path);
-        }
-
-        // Retrieves a .pdf file from a path and converts it to a .png file
-        public void ConvertPdf(string path)
-        {
-            string contentRootPath = _env.ContentRootPath;
-
-            MagickNET.SetGhostscriptDirectory(Path.Combine(contentRootPath + "\\gs9.53.3\\gsdll"));
-            var settings = new MagickReadSettings();
-            // Setting the density to 300 dpi will create an image with a better quality
-            settings.Density = new Density(300);
-
-            using (var images = new MagickImageCollection())
+            try
             {
-                // Add all the pages of the pdf file to the collection
-                images.Read(path, settings);
+                // Read from file
+                using MagickImage image = new MagickImage(path);
+                image.AutoOrient();
 
-                // Create new image that appends all the pages horizontally
-                using (var horizontal = images.AppendHorizontally())
-                {
-                    // Save result as a png
-                    horizontal.Write(path + ".png");
-                }
-
-                // Create new image that appends all the pages vertically
-                using (var vertical = images.AppendVertically())
-                {
-                    // Save result as a png
-                    vertical.Write(path + ".png");
-                }
+                image.Format = MagickFormat.Png;
+                // Save the result
+                image.Write(path);
             }
+            catch (Exception e)
+            {
+                Trace.TraceError(e.ToString());
+                Debug.Write("Unexpected Error: " + e.Message);
+                Debug.Write("Details: ");
+                Debug.Write(e.ToString());
+            };
         }
 
         [HttpPost]
