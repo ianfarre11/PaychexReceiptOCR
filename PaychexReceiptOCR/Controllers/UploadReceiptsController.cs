@@ -64,7 +64,17 @@ namespace PaychexReceiptOCR.Controllers
                     {
                         upload.CopyTo(fileStream);
                     }
-                    //Fixes rotation issues and converts PDFs to images
+
+                    // Get the extension of the uploaded file.
+                    string extension = System.IO.Path.GetExtension(AbsImagePath);
+
+                    //Check whether file is PDF and converts it to png if it is
+                    if (extension == ".pdf")
+                    {
+                        ConvertPdf(AbsImagePath);
+                    }
+
+                    //Fixes rotation issues 
                     ImageOrient(newReceipt.Path);
                     receipts.Add(newReceipt);
                 }
@@ -74,15 +84,10 @@ namespace PaychexReceiptOCR.Controllers
             return OCRRead(receipts);
         }
 
+        // Retrieves image file from the given path and fixes
+        // potential orientation bug from images taken on a cellphone
         public void ImageOrient(string path)
         {
-            // Get the extension of the uploaded file.
-            string extension = System.IO.Path.GetExtension(path);
-            //Check whether file is PDF
-            if (extension == ".pdf")
-            {
-                ConvertPdf(path);
-            }
             using MagickImage image = new MagickImage(path);
             //Automatically orients the file correctly
             image.AutoOrient();
@@ -92,6 +97,7 @@ namespace PaychexReceiptOCR.Controllers
             image.Write(path);
         }
 
+        // Retrieves a .pdf file from a path and converts it to a .png file
         public void ConvertPdf(string path)
         {
             string contentRootPath = _env.ContentRootPath;
