@@ -51,29 +51,27 @@ namespace PaychexReceiptOCR.Controllers
                 {
                     Receipt newReceipt = new Receipt();
                     newReceipt.Name = upload.FileName;
+        
+                    // Creates a path to wwwroot\userReceipts for the image to be stored
+                    var ImagePath = @"userReceipts\";
+                    var RelativeImagePath = ImagePath + upload.FileName;
+                    var AbsImagePath = Path.Combine(wwwrootPath, RelativeImagePath);
 
-                    if (System.IO.Path.GetExtension(upload.FileName) != ".pdf")
+                    newReceipt.Path = AbsImagePath;
+
+                    // Stores the image file in wwwroot\userReceipts
+                    using (var fileStream = new FileStream(AbsImagePath, FileMode.Create))
                     {
-                        // Creates a path to wwwroot\userReceipts for the image to be stored
-                        var ImagePath = @"userReceipts\";
-                        var RelativeImagePath = ImagePath + upload.FileName;
-                        var AbsImagePath = Path.Combine(wwwrootPath, RelativeImagePath);
-
-                        newReceipt.Path = AbsImagePath;
-
-                        // Stores the image file in wwwroot\userReceipts
-                        using (var fileStream = new FileStream(AbsImagePath, FileMode.Create))
-                        {
-                            upload.CopyTo(fileStream);
-                        }
-
-                        // Get the extension of the uploaded file.
-                        string extension = System.IO.Path.GetExtension(AbsImagePath);
-
-                        //Fixes rotation issues 
-                        ImageOrient(newReceipt.Path);
-                        receipts.Add(newReceipt);
+                        upload.CopyTo(fileStream);
                     }
+
+                    // Get the extension of the uploaded file.
+                    string extension = System.IO.Path.GetExtension(AbsImagePath);
+
+                    //Fixes rotation issues 
+                    ImageOrient(newReceipt.Path);
+                    receipts.Add(newReceipt);
+                    
                 }
             }
 
