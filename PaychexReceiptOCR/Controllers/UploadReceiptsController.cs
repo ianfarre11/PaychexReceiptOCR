@@ -19,7 +19,6 @@ namespace PaychexReceiptOCR.Controllers
 {
     public class UploadReceiptsController : Controller
     {
-        
         private readonly IWebHostEnvironment _env;
 
         public UploadReceiptsController(IWebHostEnvironment env)
@@ -65,11 +64,9 @@ namespace PaychexReceiptOCR.Controllers
                         upload.CopyTo(fileStream);
                     }
 
-                    // Get the extension of the uploaded file.
-                    string extension = System.IO.Path.GetExtension(AbsImagePath);
+                    // Fixes orientation on images
+                    ImageOrient(AbsImagePath);
 
-                    //Fixes rotation issues 
-                    ImageOrient(newReceipt.Path);
                     receipts.Add(newReceipt);
                     
                 }
