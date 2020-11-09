@@ -76,7 +76,10 @@ namespace PaychexReceiptOCR.Controllers
             }
 
             // Gives the receipts list to the OCRRead method
-            return OCRRead(receipts);
+            receipts = OCRRead(receipts);
+
+            // Passes List of receipts to Post view
+            return View(receipts);
         }
 
         // Retrieves image file from the given path and fixes
@@ -102,8 +105,7 @@ namespace PaychexReceiptOCR.Controllers
             };
         }
 
-        [HttpPost]
-        public IActionResult OCRRead(List<Receipt> model)
+        public List<Receipt> OCRRead(List<Receipt> model)
         {
 
             // Used to locate the tessdata folder
@@ -194,10 +196,10 @@ namespace PaychexReceiptOCR.Controllers
                 receipt.IteratedText = output;
 
                 // Identifys the Vender
-                receipt.Vender = IdentifyVendor(receipt.RawText, contentRootPath);
+                receipt.Vendor = IdentifyVendor(receipt.RawText, contentRootPath);
             }
-            // Passes List of receipts to Post view
-            return View(model);
+
+            return model;
         }
 
         // Identifies if receipt is from Starbucks, Walmart, WaffleHouse, or other 
