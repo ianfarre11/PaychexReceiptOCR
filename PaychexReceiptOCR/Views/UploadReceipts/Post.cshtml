@@ -5,6 +5,26 @@
     <title>Receipt Data</title>
 </head>
 <body>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>File Name</th>
+                <th>Vendor</th>
+                <th>Mean Confidence(For Tesseract)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var receipt in Model)
+            {
+                <tr>
+                    <th>@receipt.Name</th>
+                    <th>@receipt.Vendor</th>
+                    <th>@receipt.MeanConfidence</th>
+                </tr>
+            }
+        </tbody>
+    </table>
+
     <div class="card-deck">
         @foreach (var receipt in Model)
         {
