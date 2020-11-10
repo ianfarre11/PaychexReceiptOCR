@@ -25,6 +25,10 @@
         </tbody>
     </table>
 
+    <!-- Doesn't display Card Decks if more than 4 receipts are
+        uploaded to avoid clutter|M-->
+    @if (Model.Count() <= 4)
+    {
     <div class="card-deck">
         @foreach (var receipt in Model)
         {
@@ -59,5 +63,6 @@
         </div>
         }
     </div>
+    }
 </body>
 </html>
