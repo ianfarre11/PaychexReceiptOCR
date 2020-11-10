@@ -8,25 +8,35 @@
     <div class="card-deck">
         @foreach (var receipt in Model)
         {
-            <div class="card m-3">
-                <div class="card-header">
-                    <h3>@receipt.Name</h3>
-                </div>
-                <img class="card-img-top" src="~/userReceipts/@receipt.Name" alt="Receipt Image" />
-                <div class="card-body">
-                    <h3>Mean Confidence: @receipt.MeanConfidence</h3>
-                    <br />
-                    <h3>Raw Text:</h3>
-                    <br />
-                    <p>@receipt.RawText</p>
-                    <br />
-                    <h3>Iterated Text: </h3>
-                    @foreach (string line in receipt.IteratedText)
-                    {
-                        <p>@line</p>
-                    }
-                </div>
+        <div class="card m-3">
+            <div class="card-header">
+                <h3>@receipt.Name</h3>
             </div>
+            <img class="card-img-top" src="~/userReceipts/@receipt.Name" alt="Receipt Image" />
+            <div class="card-header">
+                <h3>Receipt Details</h3>
+            </div>
+            <div class="card-body">
+                <h3>Vendor: @receipt.Vendor</h3>
+                <br />
+            </div>
+            <div class="card-header">
+                <h3>Tesseract Reading</h3>
+            </div>
+            <div class="card-body">
+                <h3>Mean Confidence: @receipt.MeanConfidence</h3>
+                <br />
+                <h3>Raw Text:</h3>
+                <br />
+                <p>@receipt.RawText</p>
+                <br />
+                <h3>Iterated Text: </h3>
+                @foreach (string line in receipt.IteratedText)
+                {
+                    <p>@line</p>
+                }
+            </div>
+        </div>
         }
     </div>
 </body>
