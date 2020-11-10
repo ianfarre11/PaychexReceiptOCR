@@ -2,17 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PaychexReceiptOCR.Models;
 using Tesseract;
 using System.Text.RegularExpressions;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
 using ImageMagick;
 
 namespace PaychexReceiptOCR.Controllers
