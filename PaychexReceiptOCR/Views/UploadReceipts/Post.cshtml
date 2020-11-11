@@ -5,6 +5,36 @@
     <title>Receipt Data</title>
 </head>
 <body>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>File Name</th>
+                <th>Vendor</th>
+                <th>Mean Confidence(For Tesseract)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var receipt in Model)
+            {
+                <tr>
+                    <th><a href="~/userReceipts/@receipt.Name">@receipt.Name</a></th>
+                    <th>@receipt.Vendor</th>
+                    @if (String.IsNullOrWhiteSpace(receipt.RawText))
+                    {
+                        <th>Couldn't Read</th>
+                    } else
+                    {
+                        <th>@receipt.MeanConfidence</th>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Doesn't display Card Decks if more than 4 receipts are
+        uploaded to avoid clutter|M-->
+    @if (Model.Count() <= 4)
+    {
     <div class="card-deck">
         @foreach (var receipt in Model)
         {
@@ -24,7 +54,14 @@
                 <h3>Tesseract Reading</h3>
             </div>
             <div class="card-body">
-                <h3>Mean Confidence: @receipt.MeanConfidence</h3>
+                @if (String.IsNullOrWhiteSpace(receipt.RawText))
+                {
+                    <h3>Couldn't Read</h3>
+                }
+                else
+                {
+                    <h3>@receipt.MeanConfidence</h3>
+                }
                 <br />
                 <h3>Raw Text:</h3>
                 <br />
@@ -39,5 +76,6 @@
         </div>
         }
     </div>
+    }
 </body>
 </html>
