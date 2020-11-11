@@ -19,7 +19,13 @@
                 <tr>
                     <th>@receipt.Name</th>
                     <th>@receipt.Vendor</th>
-                    <th>@receipt.MeanConfidence</th>
+                    @if (String.IsNullOrWhiteSpace(receipt.RawText))
+                    {
+                        <th>Couldn't Read</th>
+                    } else
+                    {
+                        <th>@receipt.MeanConfidence</th>
+                    }
                 </tr>
             }
         </tbody>
@@ -48,7 +54,14 @@
                 <h3>Tesseract Reading</h3>
             </div>
             <div class="card-body">
-                <h3>Mean Confidence: @receipt.MeanConfidence</h3>
+                @if (String.IsNullOrWhiteSpace(receipt.RawText))
+                {
+                    <h3>Couldn't Read</h3>
+                }
+                else
+                {
+                    <h3>@receipt.MeanConfidence</h3>
+                }
                 <br />
                 <h3>Raw Text:</h3>
                 <br />
