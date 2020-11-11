@@ -17,7 +17,7 @@
             @foreach (var receipt in Model)
             {
                 <tr>
-                    <th>@receipt.Name</th>
+                    <th><a href="~/userReceipts/@receipt.Name">@receipt.Name</a></th>
                     <th>@receipt.Vendor</th>
                     @if (String.IsNullOrWhiteSpace(receipt.RawText))
                     {
