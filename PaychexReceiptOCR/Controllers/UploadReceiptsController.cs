@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PaychexReceiptOCR.Models;
-using Tesseract;
-using System.Text.RegularExpressions;
-using ImageMagick;
 using System.Threading.Tasks;
 using PaychexReceiptOCR.Helpers;
 
