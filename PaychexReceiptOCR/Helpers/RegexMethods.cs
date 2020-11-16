@@ -18,7 +18,7 @@ namespace PaychexReceiptOCR.Helpers
             List<int> CountList = new List<int>();
 
             //Check for Walmart key expressions
-            RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\..\\Properties\\Regex\\WalmartRegex.txt"));
+            RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\Properties\\Regex\\WalmartRegex.txt"));
             for (int i = 0; i < RegexList.Length; i++)
             {
                 Regex rgx = new Regex(RegexList[i]);
@@ -31,7 +31,7 @@ namespace PaychexReceiptOCR.Helpers
             CountList.Add(WalmartCount);
 
             //Check for Waffle House key expressions
-            RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\..\\Properties\\Regex\\WaffleHouseRegex.txt"));
+            RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\Properties\\Regex\\WaffleHouseRegex.txt"));
             for (int i = 0; i < RegexList.Length; i++)
             {
                 Regex rgx = new Regex(RegexList[i]);
@@ -44,7 +44,7 @@ namespace PaychexReceiptOCR.Helpers
             CountList.Add(WaffleHouseCount);
 
             //Check for Starbucks key expressions
-            RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\..\\Properties\\Regex\\StarbucksRegex.txt"));
+            RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\Properties\\Regex\\StarbucksRegex.txt"));
             for (int i = 0; i < RegexList.Length; i++)
             {
                 Regex rgx = new Regex(RegexList[i]);
@@ -57,7 +57,7 @@ namespace PaychexReceiptOCR.Helpers
             CountList.Add(StarbucksCount);
 
             //Check for Sam's Club key expressions
-            RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\..\\Properties\\Regex\\SamsClubRegex.txt"));
+            RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\Properties\\Regex\\SamsClubRegex.txt"));
             for (int i = 0; i < RegexList.Length; i++)
             {
                 Regex rgx = new Regex(RegexList[i]);

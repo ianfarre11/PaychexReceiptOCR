@@ -78,7 +78,7 @@ namespace PaychexReceiptOCR.Controllers
             var readReceipt = TesseractMethods.OCRRead(newReceipt, contentRootPath);
 
             // Identifys the Vender
-            readReceipt.Vendor = RegexMethods.IdentifyVendor(readReceipt.RawText, rootPath);
+            readReceipt.Vendor = RegexMethods.IdentifyVendor(readReceipt.RawText, contentRootPath);
 
             return readReceipt;
         }
