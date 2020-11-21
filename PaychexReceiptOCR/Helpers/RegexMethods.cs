@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using PaychexReceiptOCR.Models;
 
 namespace PaychexReceiptOCR.Helpers
 {
@@ -94,6 +95,50 @@ namespace PaychexReceiptOCR.Helpers
             else
             {
                 return ("Unknown");
+            }
+        }
+
+        public static void FindDateAndCost(Receipt receipt)
+        {
+            if (receipt.Vendor == "Walmart")
+            {
+                Regex rxTotalCost = new Regex(@"(?<=\bT\wT\wL\s+)\S+");
+                receipt.TotalCost = rxTotalCost.Match(receipt.RawText).ToString();
+
+                Regex rxDate = new Regex(@"\d+/\d+/\d+");
+                receipt.Date = rxDate.Match(receipt.RawText).ToString();
+            }
+            if (receipt.Vendor == "Starbucks")
+            {
+                Regex rxTotalCost = new Regex(@"(?<=\bTota\w\s+)\S+");
+                receipt.TotalCost = rxTotalCost.Match(receipt.RawText).ToString();
+
+                Regex rxDate = new Regex(@"\d+/\d+/\d+");
+                receipt.Date = rxDate.Match(receipt.RawText).ToString();
+            }
+            if (receipt.Vendor == "Waffle House")
+            {
+                Regex rxTotalCost = new Regex(@"(?<=\bT\wT\wL\s+)\S+");
+                receipt.TotalCost = rxTotalCost.Match(receipt.RawText).ToString();
+
+                Regex rxDate = new Regex(@"\d+/\d+/\d+");
+                receipt.Date = rxDate.Match(receipt.RawText).ToString();
+            }
+            if (receipt.Vendor == "Sam's Club")
+            {
+                Regex rxTotalCost = new Regex(@"(?<=\bT\wT\wL\s+)\S+");
+                receipt.TotalCost = rxTotalCost.Match(receipt.RawText).ToString();
+
+                Regex rxDate = new Regex(@"\d+/\d+/\d+");
+                receipt.Date = rxDate.Match(receipt.RawText).ToString();
+            }
+            if (receipt.Date == "")
+            {
+                receipt.Date = "Unknown";
+            }
+            if (receipt.TotalCost == "")
+            {
+                receipt.TotalCost = "Unknown";
             }
         }
     }
