@@ -1,0 +1,2 @@
+﻿\d+/\d+/\d+
+(?<=\bDate of Purchase:\s+)\S+\s\d+\S\s\d+
