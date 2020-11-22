@@ -15,6 +15,7 @@ namespace PaychexReceiptOCR.Helpers
             int WalmartCount = 0;
             int StarbucksCount = 0;
             int SamsClubCount = 0;
+            int DeltaCount = 0;
             string[] RegexList;
             List<int> CountList = new List<int>();
 
@@ -70,6 +71,19 @@ namespace PaychexReceiptOCR.Helpers
             }
             CountList.Add(SamsClubCount);
 
+            //Check for Delta key expressions
+            RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\Properties\\Regex\\DeltaRegex.txt"));
+            for (int i = 0; i < RegexList.Length; i++)
+            {
+                Regex rgx = new Regex(RegexList[i]);
+                if (rgx.IsMatch(rawText))
+                {
+                    DeltaCount = DeltaCount + Int32.Parse(RegexList[i + 1]);
+                }
+                i++;
+            }
+            CountList.Add(DeltaCount);
+
             //Compare count totals and decide vendor
             int MaxCount = 0;
             foreach (int i in CountList)
@@ -92,14 +106,19 @@ namespace PaychexReceiptOCR.Helpers
             {
                 return ("Sam's Club");
             }
+            else if (MaxCount == DeltaCount && DeltaCount != 0)
+            {
+                return ("Delta Airlines");
+            }
             else
             {
                 return ("Unknown");
             }
         }
 
-        public static void FindDateAndCost(Receipt receipt)
+        public static void FindDateAndCost(Receipt receipt, string contentRootPath)
         {
+            string[] RegexList;
             if (receipt.Vendor == "Walmart")
             {
                 Regex rxTotalCost = new Regex(@"(?<=\bT\wT\wL\s+)\S+");
@@ -131,6 +150,28 @@ namespace PaychexReceiptOCR.Helpers
 
                 Regex rxDate = new Regex(@"\d+/\d+/\d+");
                 receipt.Date = rxDate.Match(receipt.RawText).ToString();
+            }
+            if (receipt.Vendor == "Delta Airlines")
+            {
+                RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\Properties\\Regex\\DeltaCost.txt"));
+                for (int i = 0; i < RegexList.Length; i++)
+                {
+                    Regex rxTotalCost = new Regex(RegexList[i]);
+                    if (rxTotalCost.IsMatch(receipt.RawText))
+                    {
+                        receipt.TotalCost = rxTotalCost.Match(receipt.RawText).ToString();
+                    }
+                }
+
+                RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\Properties\\Regex\\DeltaDate.txt"));
+                for (int i = 0; i < RegexList.Length; i++)
+                {
+                    Regex rxDate = new Regex(RegexList[i]);
+                    if (rxDate.IsMatch(receipt.RawText))
+                    {
+                        receipt.Date = rxDate.Match(receipt.RawText).ToString();
+                    }
+                }
             }
             if (receipt.Date == "")
             {
