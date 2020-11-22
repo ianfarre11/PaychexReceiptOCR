@@ -81,7 +81,7 @@ namespace PaychexReceiptOCR.Controllers
             readReceipt.Vendor = RegexMethods.IdentifyVendor(readReceipt.RawText, contentRootPath);
 
             // Finds the date and cost
-            RegexMethods.FindDateAndCost(readReceipt);
+            RegexMethods.FindDateAndCost(readReceipt, contentRootPath);
             
             return readReceipt;
         }
