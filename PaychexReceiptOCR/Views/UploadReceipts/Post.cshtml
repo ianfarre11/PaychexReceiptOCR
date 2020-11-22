@@ -10,23 +10,28 @@
             <tr>
                 <th>File Name</th>
                 <th>Vendor</th>
+                <th>Total Cost</th>
+                <th>Date of Purchase</th>
                 <th>Mean Confidence(For Tesseract)</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var receipt in Model)
             {
-                <tr>
-                    <th><a href="~/userReceipts/@receipt.Name">@receipt.Name</a></th>
-                    <th>@receipt.Vendor</th>
-                    @if (String.IsNullOrWhiteSpace(receipt.RawText))
-                    {
-                        <th>Couldn't Read</th>
-                    } else
-                    {
-                        <th>@receipt.MeanConfidence</th>
-                    }
-                </tr>
+            <tr>
+                <th><a href="~/userReceipts/@receipt.Name">@receipt.Name</a></th>
+                <th>@receipt.Vendor</th>
+                <th>@receipt.TotalCost</th>
+                <th>@receipt.Date</th>
+                @if (String.IsNullOrWhiteSpace(receipt.RawText))
+                {
+                    <th>Couldn't Read</th>
+                }
+                else
+                {
+                    <th>@receipt.MeanConfidence</th>
+                }
+            </tr>
             }
         </tbody>
     </table>
