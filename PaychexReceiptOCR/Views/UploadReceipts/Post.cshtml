@@ -31,6 +31,14 @@
                 <tr>
                     <th><button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#@imageId">@shortenedName</button></th>
                     <th>@receipt.Vendor</th>
+                    @if(receipt.TotalCost != "Unknown")
+                    {
+                        <th>$@receipt.TotalCost</th>
+                    } else
+                    {
+                        <th>Unknown</th>
+                    }
+                    <th>@receipt.Date</th>
                     <!-- Checks if OCR reading was successful
                          If it was, displays the mean confidence in the table and links to the Modal PopUp of the reading-->
                     @if (String.IsNullOrWhiteSpace(receipt.RawText))
