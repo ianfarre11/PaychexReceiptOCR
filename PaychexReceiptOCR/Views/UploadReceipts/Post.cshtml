@@ -26,28 +26,32 @@
                 // Creates unique IDs for ModalPopUps
                 string imageId = "Image" + counter;
                 string readingId = "Reading" + counter;
-                string shortenedName = receipt.Name.Substring(0, 15) + "...";
+                string name = receipt.Name;
+                if (name.Length > 15)
+                {
+                    name = receipt.Name.Substring(0, 15) + "...";
+                } 
 
                 <tr>
-                    <th><button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#@imageId">@shortenedName</button></th>
-                    <th>@receipt.Vendor</th>
+                    <td><button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#@imageId">@name</button></td>
+                    <td>@receipt.Vendor</td>
                     @if(receipt.TotalCost != "Unknown")
                     {
-                        <th>$@receipt.TotalCost</th>
+                        <td>$@receipt.TotalCost</td>
                     } else
                     {
-                        <th>Unknown</th>
+                        <td>Unknown</td>
                     }
-                    <th>@receipt.Date</th>
+                    <td>@receipt.Date</td>
                     <!-- Checks if OCR reading was successful
                          If it was, displays the mean confidence in the table and links to the Modal PopUp of the reading-->
                     @if (String.IsNullOrWhiteSpace(receipt.RawText))
                     {
-                        <th>Couldn't Read</th>
+                        <td>Couldn't Read</td>
                     }
                     else
                     {
-                        <th><button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#@readingId">@receipt.MeanConfidence</button></th>
+                        <td><button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#@readingId">@receipt.MeanConfidence</button></td>
                     }
                 </tr>
 
