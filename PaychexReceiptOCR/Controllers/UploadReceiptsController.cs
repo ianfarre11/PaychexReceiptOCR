@@ -43,6 +43,7 @@ namespace PaychexReceiptOCR.Controllers
                 // Assigns every receipt a unique ID to be used as the id attribute for 
                 // the modal image in the view.
                 createReceiptTasks.Add(CreateReceiptAsync(upload, wwwrootPath, counter));
+                counter++;
             }
 
             // A List<Receipt> object that is returned when all the tasks are complete
