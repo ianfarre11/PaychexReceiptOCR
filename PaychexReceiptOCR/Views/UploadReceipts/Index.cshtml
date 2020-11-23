@@ -7,20 +7,34 @@
 </head>
 <body>
     <div id="FormDiv" style="padding-top:200px">
-        <form method="post" enctype="multipart/form-data" asp-controller="UploadReceipts" asp-action="Post" >
+        <form method="post" enctype="multipart/form-data" asp-controller="UploadReceipts" asp-action="Post">
             <div class="form-group">
                 <div class="col-md-10">
                     <p>Upload multiple receipts using this form (No PDFs):</p>
-                    <input type="file" name="receipts" class="form-control" multiple="multiple" accept=".png,.tif,.tiff,.jpg,.jpeg"/>
+                    <input type="file" name="receipts" class="form-control" multiple="multiple" accept=".png,.tif,.tiff,.jpg,.jpeg" />
                 </div>
             </div>
             <div class="form-group">
                 <div class="col-md-10">
-                    <input type="submit" value="Upload">
+                    <input id="submitButton" type="submit" value="Upload" onclick="showSpinner()">
                 </div>
-            </div> 
+            </div>
         </form>
     </div>
+
+    <div id="spinner" style="visibility: hidden; padding-top:250px" class="text-center">
+        <div class="spinner-border text-primary" role="status" style="width: 6rem; height: 6rem">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
+    <script>
+        // Makes Spinner visible and hides form while the controller is loading
+        function showSpinner() {
+            document.getElementById("spinner").style.visibility = "visible";
+            document.getElementById("FormDiv").style.display = "none";
+        }
+    </script>
 
 </body>
 </html>

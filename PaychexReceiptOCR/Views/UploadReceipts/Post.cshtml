@@ -16,75 +16,99 @@
             </tr>
         </thead>
         <tbody>
+
+            @{
+                // Counter used for assigning unique IDs to the Modal PopUps
+                int counter = 0;
+            }
             @foreach (var receipt in Model)
             {
-            <tr>
-                <th><a href="~/userReceipts/@receipt.Name">@receipt.Name</a></th>
-                <th>@receipt.Vendor</th>
-                <th>$@receipt.TotalCost</th>
-                <th>@receipt.Date</th>
-                @if (String.IsNullOrWhiteSpace(receipt.RawText))
-                {
-                    <th>Couldn't Read</th>
-                }
-                else
-                {
-                    <th>@receipt.MeanConfidence</th>
-                }
-            </tr>
+                // Creates unique IDs for ModalPopUps
+                string imageId = "Image" + counter;
+                string readingId = "Reading" + counter;
+                string shortenedName = receipt.Name.Substring(0, 15) + "...";
+
+                <tr>
+                    <th><button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#@imageId">@shortenedName</button></th>
+                    <th>@receipt.Vendor</th>
+                    <!-- Checks if OCR reading was successful
+                         If it was, displays the mean confidence in the table and links to the Modal PopUp of the reading-->
+                    @if (String.IsNullOrWhiteSpace(receipt.RawText))
+                    {
+                        <th>Couldn't Read</th>
+                    }
+                    else
+                    {
+                        <th><button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#@readingId">@receipt.MeanConfidence</button></th>
+                    }
+                </tr>
+
+                counter++;
             }
         </tbody>
     </table>
 
-    <!-- Doesn't display Card Decks if more than 4 receipts are
-        uploaded to avoid clutter|M-->
-    @if (Model.Count() <= 4)
+    @{
+        // Counter used for assigning unique IDs to the Modal PopUps
+        counter = 0;
+    }
+    @foreach (var receipt in Model)
     {
-    <div class="card-deck">
-        @foreach (var receipt in Model)
-        {
-        <div class="card m-3">
-            <div class="card-header">
-                <h3>@receipt.Name</h3>
-            </div>
-            <img class="card-img-top" src="~/userReceipts/@receipt.Name" alt="Receipt Image" />
-            <div class="card-header">
-                <h3>Receipt Details</h3>
-            </div>
-            <div class="card-body">
-                <h3>Vendor: @receipt.Vendor</h3>
-                <br />
-                <h3>Date: @receipt.Date</h3>
-                <br />
-                <h3>Total Cost: @receipt.TotalCost</h3>
-                <br />
-            </div>
-            <div class="card-header">
-                <h3>Tesseract Reading</h3>
-            </div>
-            <div class="card-body">
-                @if (String.IsNullOrWhiteSpace(receipt.RawText))
-                {
-                    <h3>Couldn't Read</h3>
-                }
-                else
-                {
-                    <h3>@receipt.MeanConfidence</h3>
-                }
-                <br />
-                <h3>Raw Text:</h3>
-                <br />
-                <p>@receipt.RawText</p>
-                <br />
-                <h3>Iterated Text: </h3>
-                @foreach (string line in receipt.IteratedText)
-                {
-                    <p>@line</p>
-                }
+        // Creates unique IDs for ModalPopUps
+        string imageId = "Image" + counter;
+        string readingId = "Reading" + counter;
+
+        <!-- Modal for displaying image -->
+        <div id="@imageId" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">@receipt.Name</h4>
+                    </div>
+                    <div class="modal-body">
+                        <img src="~/userReceipts/@receipt.Name" width="470" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+
             </div>
         </div>
+
+        <!-- Checks if OCR reading was successful
+           If it was, creates a Modal PopUp for viewing the iterated text-->
+        @if (!String.IsNullOrWhiteSpace(receipt.RawText))
+        {
+            <!-- Modal for displaying iterated text -->
+            <div id="@readingId" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title">@receipt.Name</h4>
+                        </div>
+                        <div class="modal-body">
+                            @foreach (string line in receipt.IteratedText)
+                            {
+                                <p>@line</p>
+                            }
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
         }
-    </div>
+
+        counter++;
     }
 </body>
 </html>
