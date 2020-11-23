@@ -147,8 +147,7 @@ namespace PaychexReceiptOCR.Helpers
 
                 Regex rxDate = new Regex(@"\d+/\d+/\d+");
                 receipt.Date = rxDate.Match(receipt.RawText).ToString();
-            }
-            if (receipt.Vendor == "Delta Airlines")
+            } else if (receipt.Vendor == "Delta Airlines")
             {
                 RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\Properties\\Regex\\DeltaCost.txt"));
                 for (int i = 0; i < RegexList.Length; i++)
@@ -169,14 +168,10 @@ namespace PaychexReceiptOCR.Helpers
                         receipt.Date = rxDate.Match(receipt.RawText).ToString();
                     }
                 }
-            }
-            if (receipt.Date == "")
-            {
-                receipt.Date = "Unknown";
-            }
-            if (receipt.TotalCost == "")
+            } else 
             {
                 receipt.TotalCost = "Unknown";
+                receipt.Date = "Unknown";
             }
         }
     }
