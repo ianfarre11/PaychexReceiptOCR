@@ -14,9 +14,14 @@
             </tr>
         </thead>
         <tbody>
-            @{ int counter = 0;}
+
+            @{
+                // Counter used for assigning unique IDs to the Modal PopUps
+                int counter = 0;
+            }
             @foreach (var receipt in Model)
             {
+                // Creates unique IDs for ModalPopUps
                 string imageId = "Image" + counter;
                 string readingId = "Reading" + counter;
                 string shortenedName = receipt.Name.Substring(0, 15) + "...";
@@ -24,6 +29,8 @@
                 <tr>
                     <th><button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#@imageId">@shortenedName</button></th>
                     <th>@receipt.Vendor</th>
+                    <!-- Checks if OCR reading was successful
+                         If it was, displays the mean confidence in the table and links to the Modal PopUp of the reading-->
                     @if (String.IsNullOrWhiteSpace(receipt.RawText))
                     {
                         <th>Couldn't Read</th>
@@ -39,9 +46,13 @@
         </tbody>
     </table>
 
-    @{ counter = 0;}
+    @{
+        // Counter used for assigning unique IDs to the Modal PopUps
+        counter = 0;
+    }
     @foreach (var receipt in Model)
     {
+        // Creates unique IDs for ModalPopUps
         string imageId = "Image" + counter;
         string readingId = "Reading" + counter;
 
@@ -66,6 +77,8 @@
             </div>
         </div>
 
+        <!-- Checks if OCR reading was successful
+           If it was, creates a Modal PopUp for viewing the iterated text-->
         @if (!String.IsNullOrWhiteSpace(receipt.RawText))
         {
             <!-- Modal for displaying iterated text -->
