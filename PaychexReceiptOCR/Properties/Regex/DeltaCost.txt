@@ -1,2 +1,2 @@
-﻿(?<=\bTotal Price:\s+)\S+
-(?<=\bTotal flight cost:\s+)\S+
+﻿(?<=\bTotal Price:\s+\$)\S+
+(?<=\bTotal flight cost:\s+\$)\S+

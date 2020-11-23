@@ -1,8 +1,8 @@
 ITEMS SOLD
 1
-\*\*\*Cust\w\w\w\w \w\wpy\*\*\*
-1
 Save money
-2
+3
 Live better
-2
+3
+Walmart
+10

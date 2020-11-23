@@ -2,7 +2,9 @@ Entry Mode[!l]
 2
 Batch [8#][!:]
 2
+Batch
+2
 FFLE HOUSE
 3
-PRE-TIP \w\wt
-2
+PRE-TIP
+1
