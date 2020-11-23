@@ -18,9 +18,10 @@
             {
                 string imageId = "Image" + receipt.Order.ToString();
                 string readingId = "Reading" + receipt.Order.ToString();
+                string shortenedName = receipt.Name.Substring(0, 15) + "...";
 
                 <tr>
-                    <th><button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#@imageId">@receipt.Name</button></th>
+                    <th><button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#@imageId">@shortenedName</button></th>
                     <th>@receipt.Vendor</th>
                     @if (String.IsNullOrWhiteSpace(receipt.RawText))
                     {
@@ -40,7 +41,7 @@
         string imageId = "Image" + receipt.Order.ToString();
         string readingId = "Reading" + receipt.Order.ToString();
 
-        <!-- Modal -->
+        <!-- Modal for displaying image -->
         <div id="@imageId" class="modal fade" role="dialog">
             <div class="modal-dialog">
 
@@ -63,7 +64,7 @@
 
         @if (!String.IsNullOrWhiteSpace(receipt.RawText))
         {
-            <!-- Modal -->
+            <!-- Modal for displaying iterated text -->
             <div id="@readingId" class="modal fade" role="dialog">
                 <div class="modal-dialog">
 
