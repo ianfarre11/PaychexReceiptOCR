@@ -35,15 +35,10 @@ namespace PaychexReceiptOCR.Controllers
             // Holds the collection of tasks
             List<Task<Receipt>> createReceiptTasks = new List<Task<Receipt>>();
 
-            int counter = 0;
-
             // Processes each IFormFile in parallel
             foreach (var upload in uploads)
             {
-                // Assigns every receipt a unique ID to be used as the id attribute for 
-                // the modal image in the view.
-                createReceiptTasks.Add(CreateReceiptAsync(upload, wwwrootPath, counter));
-                counter++;
+                createReceiptTasks.Add(CreateReceiptAsync(upload, wwwrootPath));
             }
 
             // A List<Receipt> object that is returned when all the tasks are complete
@@ -54,14 +49,13 @@ namespace PaychexReceiptOCR.Controllers
         }
 
         // Processes the IFormFile
-        private async Task<Receipt> CreateReceiptAsync(IFormFile image, string rootPath, int order)
+        private async Task<Receipt> CreateReceiptAsync(IFormFile image, string rootPath)
         {
             // Finds path to wwwroot
             string contentRootPath = _env.ContentRootPath;
 
             Receipt newReceipt = new Receipt();
             newReceipt.Name = image.FileName;
-            newReceipt.Order = order;
 
             // Creates a path to wwwroot\userReceipts for the image to be stored
             var ImagePath = @"userReceipts\";

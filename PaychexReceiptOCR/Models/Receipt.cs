@@ -22,7 +22,5 @@ namespace PaychexReceiptOCR.Models
         public string Date { get; set; }
 
         public string Vendor { get; set; }
-
-        public int Order { get; set; }
     }
 }

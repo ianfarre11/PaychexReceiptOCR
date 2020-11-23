@@ -14,10 +14,11 @@
             </tr>
         </thead>
         <tbody>
+            @{ int counter = 0;}
             @foreach (var receipt in Model)
             {
-                string imageId = "Image" + receipt.Order.ToString();
-                string readingId = "Reading" + receipt.Order.ToString();
+                string imageId = "Image" + counter;
+                string readingId = "Reading" + counter;
                 string shortenedName = receipt.Name.Substring(0, 15) + "...";
 
                 <tr>
@@ -32,14 +33,17 @@
                         <th><button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#@readingId">@receipt.MeanConfidence</button></th>
                     }
                 </tr>
+
+                counter++;
             }
         </tbody>
     </table>
 
+    @{ counter = 0;}
     @foreach (var receipt in Model)
     {
-        string imageId = "Image" + receipt.Order.ToString();
-        string readingId = "Reading" + receipt.Order.ToString();
+        string imageId = "Image" + counter;
+        string readingId = "Reading" + counter;
 
         <!-- Modal for displaying image -->
         <div id="@imageId" class="modal fade" role="dialog">
@@ -88,6 +92,8 @@
                 </div>
             </div>
         }
+
+        counter++;
     }
 </body>
 </html>
