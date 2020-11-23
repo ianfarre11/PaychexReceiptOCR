@@ -107,16 +107,21 @@ namespace PaychexReceiptOCR.Helpers
 
                 Regex rxDate = new Regex(@"\d+/\d+/\d+");
                 receipt.Date = rxDate.Match(receipt.RawText).ToString();
-            }
-            if (receipt.Vendor == "Starbucks")
+            } else if (receipt.Vendor == "Starbucks")
             {
                 Regex rxTotalCost = new Regex(@"(?<=\bTota\w\s+)\S+");
                 receipt.TotalCost = rxTotalCost.Match(receipt.RawText).ToString();
 
                 Regex rxDate = new Regex(@"\d+/\d+/\d+");
                 receipt.Date = rxDate.Match(receipt.RawText).ToString();
-            }
-            if (receipt.Vendor == "Waffle House")
+            } else if (receipt.Vendor == "Waffle House")
+            {
+                Regex rxTotalCost = new Regex(@"(?<=\bT\wT\wL\s+)\S+");
+                receipt.TotalCost = rxTotalCost.Match(receipt.RawText).ToString();
+
+                Regex rxDate = new Regex(@"\d+/\d+/\d+");
+                receipt.Date = rxDate.Match(receipt.RawText).ToString();
+            } else if (receipt.Vendor == "Sam's Club")
             {
                 Regex rxTotalCost = new Regex(@"(?<=\bT\wT\wL\s+)\S+");
                 receipt.TotalCost = rxTotalCost.Match(receipt.RawText).ToString();
@@ -124,14 +129,7 @@ namespace PaychexReceiptOCR.Helpers
                 Regex rxDate = new Regex(@"\d+/\d+/\d+");
                 receipt.Date = rxDate.Match(receipt.RawText).ToString();
             }
-            if (receipt.Vendor == "Sam's Club")
-            {
-                Regex rxTotalCost = new Regex(@"(?<=\bT\wT\wL\s+)\S+");
-                receipt.TotalCost = rxTotalCost.Match(receipt.RawText).ToString();
 
-                Regex rxDate = new Regex(@"\d+/\d+/\d+");
-                receipt.Date = rxDate.Match(receipt.RawText).ToString();
-            }
             if (receipt.Date == "")
             {
                 receipt.Date = "Unknown";

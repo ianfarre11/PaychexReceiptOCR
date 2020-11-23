@@ -21,7 +21,7 @@
             <tr>
                 <th><a href="~/userReceipts/@receipt.Name">@receipt.Name</a></th>
                 <th>@receipt.Vendor</th>
-                <th>@receipt.TotalCost</th>
+                <th>$@receipt.TotalCost</th>
                 <th>@receipt.Date</th>
                 @if (String.IsNullOrWhiteSpace(receipt.RawText))
                 {
