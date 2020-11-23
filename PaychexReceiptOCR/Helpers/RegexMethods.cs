@@ -121,33 +121,93 @@ namespace PaychexReceiptOCR.Helpers
             string[] RegexList;
             if (receipt.Vendor == "Walmart")
             {
-                Regex rxTotalCost = new Regex(@"(?<=\bT\wT\wL\s+)\S+");
-                receipt.TotalCost = rxTotalCost.Match(receipt.RawText).ToString();
+                RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\Properties\\Regex\\WalmartCost.txt"));
+                for (int i = 0; i < RegexList.Length; i++)
+                {
+                    Regex rxTotalCost = new Regex(RegexList[i]);
+                    if (rxTotalCost.IsMatch(receipt.RawText))
+                    { 
+                        receipt.TotalCost = Regex.Replace(rxTotalCost.Match(receipt.RawText).ToString(), @"\s+", "");
+                    }
+                }
 
-                Regex rxDate = new Regex(@"\d+/\d+/\d+");
-                receipt.Date = rxDate.Match(receipt.RawText).ToString();
-            } else if (receipt.Vendor == "Starbucks")
+                RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\Properties\\Regex\\WalmartDate.txt"));
+                for (int i = 0; i < RegexList.Length; i++)
+                {
+                    Regex rxDate = new Regex(RegexList[i]);
+                    if (rxDate.IsMatch(receipt.RawText))
+                    {
+                        receipt.Date = rxDate.Match(receipt.RawText).ToString();
+                    }
+                }
+            }
+            if (receipt.Vendor == "Starbucks")
             {
-                Regex rxTotalCost = new Regex(@"(?<=\bTota\w\s+)\S+");
-                receipt.TotalCost = rxTotalCost.Match(receipt.RawText).ToString();
+                RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\Properties\\Regex\\StarbucksCost.txt"));
+                for (int i = 0; i < RegexList.Length; i++)
+                {
+                    Regex rxTotalCost = new Regex(RegexList[i]);
+                    if (rxTotalCost.IsMatch(receipt.RawText))
+                    {
+                        receipt.TotalCost = Regex.Replace(rxTotalCost.Match(receipt.RawText).ToString(), @"\s+", "");
+                    }
+                }
 
-                Regex rxDate = new Regex(@"\d+/\d+/\d+");
-                receipt.Date = rxDate.Match(receipt.RawText).ToString();
-            } else if (receipt.Vendor == "Waffle House")
+                RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\Properties\\Regex\\StarbucksDate.txt"));
+                for (int i = 0; i < RegexList.Length; i++)
+                {
+                    Regex rxDate = new Regex(RegexList[i]);
+                    if (rxDate.IsMatch(receipt.RawText))
+                    {
+                        receipt.Date = rxDate.Match(receipt.RawText).ToString();
+                    }
+                }
+            }
+            if (receipt.Vendor == "Waffle House")
             {
-                Regex rxTotalCost = new Regex(@"(?<=\bT\wT\wL\s+)\S+");
-                receipt.TotalCost = rxTotalCost.Match(receipt.RawText).ToString();
+                RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\Properties\\Regex\\WaffleHouseCost.txt"));
+                for (int i = 0; i < RegexList.Length; i++)
+                {
+                    Regex rxTotalCost = new Regex(RegexList[i]);
+                    if (rxTotalCost.IsMatch(receipt.RawText))
+                    {
+                        receipt.TotalCost = Regex.Replace(rxTotalCost.Match(receipt.RawText).ToString(), @"\s+", "");
+                    }
+                }
 
-                Regex rxDate = new Regex(@"\d+/\d+/\d+");
-                receipt.Date = rxDate.Match(receipt.RawText).ToString();
-            } else if (receipt.Vendor == "Sam's Club")
+                RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\Properties\\Regex\\WaffleHouseDate.txt"));
+                for (int i = 0; i < RegexList.Length; i++)
+                {
+                    Regex rxDate = new Regex(RegexList[i]);
+                    if (rxDate.IsMatch(receipt.RawText))
+                    {
+                        receipt.Date = rxDate.Match(receipt.RawText).ToString();
+                    }
+                }
+            }
+            if (receipt.Vendor == "Sam's Club")
             {
-                Regex rxTotalCost = new Regex(@"(?<=\bT\wT\wL\s+)\S+");
-                receipt.TotalCost = rxTotalCost.Match(receipt.RawText).ToString();
+                RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\Properties\\Regex\\SamsClubCost.txt"));
+                for (int i = 0; i < RegexList.Length; i++)
+                {
+                    Regex rxTotalCost = new Regex(RegexList[i]);
+                    if (rxTotalCost.IsMatch(receipt.RawText))
+                    {
+                        receipt.TotalCost = Regex.Replace(rxTotalCost.Match(receipt.RawText).ToString(), @"\s+", "");
+                    }
+                }
 
-                Regex rxDate = new Regex(@"\d+/\d+/\d+");
-                receipt.Date = rxDate.Match(receipt.RawText).ToString();
-            } else if (receipt.Vendor == "Delta Airlines")
+                RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\Properties\\Regex\\SamsClubDate.txt"));
+                for (int i = 0; i < RegexList.Length; i++)
+                {
+                    Regex rxDate = new Regex(RegexList[i]);
+                    if (rxDate.IsMatch(receipt.RawText))
+                    {
+                        receipt.Date = rxDate.Match(receipt.RawText).ToString();
+                    }
+                }
+            }
+            if (receipt.Vendor == "Delta Airlines")
             {
                 RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\Properties\\Regex\\DeltaCost.txt"));
                 for (int i = 0; i < RegexList.Length; i++)
@@ -168,10 +228,14 @@ namespace PaychexReceiptOCR.Helpers
                         receipt.Date = rxDate.Match(receipt.RawText).ToString();
                     }
                 }
-            } else 
+            }
+            if (receipt.Date == "" || receipt.TotalCost == null)
+            {
+                receipt.Date = "Unknown";
+            }
+            if (receipt.TotalCost == "" || receipt.TotalCost == null || Regex.IsMatch(receipt.TotalCost, @"^[^0-9]"))
             {
                 receipt.TotalCost = "Unknown";
-                receipt.Date = "Unknown";
             }
         }
     }
