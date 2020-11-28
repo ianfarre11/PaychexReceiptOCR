@@ -229,7 +229,7 @@ namespace PaychexReceiptOCR.Helpers
                     }
                 }
             }
-            if (receipt.Date == "" || receipt.TotalCost == null)
+            if (receipt.Date == "" || receipt.Date == null)
             {
                 receipt.Date = "Unknown";
             }
