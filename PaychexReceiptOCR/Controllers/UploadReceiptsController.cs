@@ -18,7 +18,12 @@ namespace PaychexReceiptOCR.Controllers
             _env = env;
         }
 
-        public IActionResult Index()
+        public IActionResult FileUploader()
+        {
+            return View();
+        }
+
+        public IActionResult FolderUploader()
         {
             return View();
         }
@@ -55,11 +60,11 @@ namespace PaychexReceiptOCR.Controllers
             string contentRootPath = _env.ContentRootPath;
 
             Receipt newReceipt = new Receipt();
-            newReceipt.Name = image.FileName;
+            newReceipt.Name = Path.GetFileName(image.FileName);
 
             // Creates a path to wwwroot\userReceipts for the image to be stored
             var ImagePath = @"userReceipts\";
-            var RelativeImagePath = ImagePath + image.FileName;
+            var RelativeImagePath = ImagePath + newReceipt.Name;
             var AbsImagePath = Path.Combine(rootPath, RelativeImagePath);
 
             newReceipt.Path = AbsImagePath;
@@ -78,7 +83,9 @@ namespace PaychexReceiptOCR.Controllers
             var readReceipt = TesseractMethods.OCRRead(newReceipt, contentRootPath);
 
             // Identifys the Vender
-            readReceipt.Vendor = RegexMethods.IdentifyVendor(readReceipt.RawText, contentRootPath);
+            if (!System.String.IsNullOrWhiteSpace(readReceipt.RawText)) {
+                readReceipt.Vendor = RegexMethods.IdentifyVendor(readReceipt.RawText, contentRootPath);
+            }
 
             return readReceipt;
         }
