@@ -24,10 +24,14 @@
                 // Creates unique IDs for ModalPopUps
                 string imageId = "Image" + counter;
                 string readingId = "Reading" + counter;
-                string shortenedName = receipt.Name.Substring(0, 15) + "...";
+                string name = receipt.Name;
+                if (name.Length > 16)
+                {
+                    name = receipt.Name.Substring(0, 15) + "...";
+                }
 
                 <tr>
-                    <th><button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#@imageId">@shortenedName</button></th>
+                    <th><button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#@imageId">@name</button></th>
                     <th>@receipt.Vendor</th>
                     <!-- Checks if OCR reading was successful
                          If it was, displays the mean confidence in the table and links to the Modal PopUp of the reading-->
