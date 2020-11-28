@@ -215,7 +215,7 @@ namespace PaychexReceiptOCR.Helpers
                     Regex rxTotalCost = new Regex(RegexList[i]);
                     if (rxTotalCost.IsMatch(receipt.RawText))
                     {
-                        receipt.TotalCost = rxTotalCost.Match(receipt.RawText).ToString();
+                        receipt.TotalCost = Regex.Replace(rxTotalCost.Match(receipt.RawText).ToString(), @"\s+", "");
                     }
                 }
 
