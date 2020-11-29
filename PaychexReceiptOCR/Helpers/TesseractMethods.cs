@@ -41,11 +41,6 @@ namespace PaychexReceiptOCR.Helpers
             // Holds the iterated text data 
             List<string> iterated = new List<string>();
 
-            // Redirects console ouput to a string
-            var sw = new StringWriter();
-            Console.SetOut(sw);
-            Console.SetError(sw);
-
             // Iterates through the tesseract page  
             using (var iter = page.GetIterator())
             {
@@ -53,41 +48,9 @@ namespace PaychexReceiptOCR.Helpers
 
                 do
                 {
-                    do
-                    {
-                        do
-                        {
-                            do
-                            {
-                                if (iter.IsAtBeginningOf(PageIteratorLevel.Block))
-                                {
-                                    // Whenever a new BLOCK it iterated, the current StringWriter contents are added to the the ouput
-                                    // and a new StringWriter object in instantiated in place of the old one
-                                    iterated.Add(sw.ToString());
-                                    sw = new StringWriter();
-                                    Console.SetOut(sw);
-                                    Console.SetError(sw);
-                                }
-
-                                Console.Write(iter.GetText(PageIteratorLevel.Word));
-                                Console.Write(" ");
-
-                                if (iter.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word))
-                                {
-                                    Console.WriteLine("");
-                                }
-                            } while (iter.Next(PageIteratorLevel.TextLine, PageIteratorLevel.Word));
-
-                            if (iter.IsAtFinalOf(PageIteratorLevel.Para, PageIteratorLevel.TextLine))
-                            {
-                                Console.WriteLine("");
-                            }
-                        } while (iter.Next(PageIteratorLevel.Para, PageIteratorLevel.TextLine));
-                    } while (iter.Next(PageIteratorLevel.Block, PageIteratorLevel.Para));
-                } while (iter.Next(PageIteratorLevel.Block));
+                    iterated.Add(iter.GetText(PageIteratorLevel.TextLine));
+                } while (iter.Next(PageIteratorLevel.TextLine));
             }
-
-            iterated.Add(sw.ToString());
 
             return iterated;
         }
