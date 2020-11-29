@@ -1,8 +1,4 @@
-﻿.DELTA
+﻿\SDELTA
 5
-Flight
-2
-Passenger
-1
-PASSENGER
-1
+Del\wa
+5
