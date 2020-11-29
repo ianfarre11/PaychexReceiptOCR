@@ -229,6 +229,28 @@ namespace PaychexReceiptOCR.Helpers
                     }
                 }
             }
+            if (receipt.Vendor == "Unknown")
+            {
+                RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\Properties\\Regex\\UnknownCost.txt"));
+                for (int i = 0; i < RegexList.Length; i++)
+                {
+                    Regex rxTotalCost = new Regex(RegexList[i]);
+                    if (rxTotalCost.IsMatch(receipt.RawText))
+                    {
+                        receipt.TotalCost = Regex.Replace(rxTotalCost.Match(receipt.RawText).ToString(), @"\s+", "");
+                    }
+                }
+
+                RegexList = System.IO.File.ReadAllLines(Path.Combine(contentRootPath + "\\Properties\\Regex\\UnknownDate.txt"));
+                for (int i = 0; i < RegexList.Length; i++)
+                {
+                    Regex rxDate = new Regex(RegexList[i]);
+                    if (rxDate.IsMatch(receipt.RawText))
+                    {
+                        receipt.Date = rxDate.Match(receipt.RawText).ToString();
+                    }
+                }
+            }
             if (receipt.Date == "" || receipt.Date == null)
             {
                 receipt.Date = "Unknown";
