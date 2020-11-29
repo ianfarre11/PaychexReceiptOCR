@@ -6,7 +6,7 @@
     <title>Receipt Uploader</title>
 </head>
 <body>
-    <div id="FormDiv" style="padding-top:200px">
+    <div id="FormDiv" class="center">
         <form method="post" enctype="multipart/form-data" asp-controller="UploadReceipts" asp-action="Post">
             <div class="form-group">
                 <div class="col-md-10">
@@ -22,11 +22,25 @@
         </form>
     </div>
 
-    <div id="spinner" style="visibility: hidden; padding-top:250px" class="text-center">
-        <div class="spinner-border text-primary" role="status" style="width: 6rem; height: 6rem">
-            <span class="sr-only">Loading...</span>
+    <div class="center">
+        <div id="spinner" style="visibility: hidden" class="text-center">
+            <div class="spinner-border text-primary" role="status" style="width: 6rem; height: 6rem">
+                <span class="sr-only">Loading...</span>
+            </div>
         </div>
     </div>
+
+    <!-- I know this shouldn't go here but the site.css file wasn't connecting-->
+    <style>
+        .center {
+            margin: 0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            -ms-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+        }
+    </style>
 
     <script>
         // Makes Spinner visible and hides form while the controller is loading
