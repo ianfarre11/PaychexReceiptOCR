@@ -255,7 +255,7 @@ namespace PaychexReceiptOCR.Helpers
             {
                 receipt.Date = "Unknown";
             }
-            if (receipt.TotalCost == "" || receipt.TotalCost == null || Regex.IsMatch(receipt.TotalCost, @"^[^0-9]"))
+            if (receipt.TotalCost == "" || receipt.TotalCost == null || Regex.IsMatch(receipt.TotalCost, @"[^0-9\.]"))
             {
                 receipt.TotalCost = "Unknown";
             }
