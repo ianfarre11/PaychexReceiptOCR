@@ -27,33 +27,34 @@
                 string imageId = "Image" + counter;
                 string readingId = "Reading" + counter;
                 string name = receipt.Name;
-                if (name.Length > 15)
+                if (name.Length > 16)
                 {
                     name = receipt.Name.Substring(0, 15) + "...";
-                } 
+                }
 
-                <tr>
-                    <td><button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#@imageId">@name</button></td>
-                    <td>@receipt.Vendor</td>
-                    @if(receipt.TotalCost != "Unknown")
-                    {
-                        <td>$@receipt.TotalCost</td>
-                    } else
-                    {
-                        <td>Unknown</td>
-                    }
-                    <td>@receipt.Date</td>
-                    <!-- Checks if OCR reading was successful
-                         If it was, displays the mean confidence in the table and links to the Modal PopUp of the reading-->
-                    @if (String.IsNullOrWhiteSpace(receipt.RawText))
-                    {
-                        <td>Couldn't Read</td>
-                    }
-                    else
-                    {
-                        <td><button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#@readingId">@receipt.MeanConfidence</button></td>
-                    }
-                </tr>
+            <tr>
+                <th><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#@imageId">@name</button></th>
+                <th>@receipt.Vendor</th>
+                @if (receipt.TotalCost != "Unknown")
+                {
+                    <th>$@receipt.TotalCost</th>
+                }
+                else
+                {
+                    <td>Unknown</td>
+                }
+                <th>@receipt.Date</th>
+                <!-- Checks if OCR reading was successful
+                If it was, displays the mean confidence in the table and links to the Modal PopUp of the reading-->
+                @if (String.IsNullOrWhiteSpace(receipt.RawText))
+                {
+                    <th>Couldn't Read</th>
+                }
+                else
+                {
+                    <th><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#@readingId">@receipt.MeanConfidence</button></th>
+                }
+            </tr>
 
                 counter++;
             }
