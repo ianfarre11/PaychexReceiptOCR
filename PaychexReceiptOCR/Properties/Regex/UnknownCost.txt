@@ -1,0 +1,5 @@
+﻿(?<=\bT\wT\wL\s+)\d+\S+\d+
+(?<=\bTota\w\s+)\S+
+(?<=\bAMOUNT:\s+\S)\d+\S+\d+
+(?<=\bAMOUNT PAID\s+)\d+\S\d+
+(?<=\bTotal Price:\s+\$)\S+
