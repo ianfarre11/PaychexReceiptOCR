@@ -83,11 +83,14 @@ namespace PaychexReceiptOCR.Controllers
             // with the reading data 
             var readReceipt = TesseractMethods.OCRRead(newReceipt, contentRootPath);
 
-            // Identifys the Vender
             if (!System.String.IsNullOrWhiteSpace(readReceipt.RawText)) {
+                // Identifys the Vender
                 readReceipt.Vendor = RegexMethods.IdentifyVendor(readReceipt.RawText, contentRootPath);
-            }
 
+                // Finds the date and cost
+                RegexMethods.FindDateAndCost(readReceipt, contentRootPath);
+            }
+            
             return readReceipt;
         }
     }
