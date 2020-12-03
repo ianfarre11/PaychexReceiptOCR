@@ -29,6 +29,7 @@ namespace PaychexReceiptOCR.Controllers
         }
 
         [HttpPost("UploadReceipts")]
+        [DisableRequestSizeLimit]
         public async Task<IActionResult> PostAsync()
         {
             // Finds path to wwwroot
