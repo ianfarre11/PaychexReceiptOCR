@@ -6,12 +6,17 @@ using Microsoft.AspNetCore.Mvc;
 using PaychexReceiptOCR.Models;
 using System.Threading.Tasks;
 using PaychexReceiptOCR.Helpers;
+using System;
+using System.Diagnostics;
 
 namespace PaychexReceiptOCR.Controllers
 {
     public class UploadReceiptsController : Controller
     {
         private readonly IWebHostEnvironment _env;
+
+        // Used for Progress Bar
+        private double receiptsProcessed = 0;
 
         public UploadReceiptsController(IWebHostEnvironment env)
         {
@@ -20,14 +25,20 @@ namespace PaychexReceiptOCR.Controllers
 
         public IActionResult FileUploader()
         {
+            CleanUserReceipts();
             return View();
         }
 
         public IActionResult FolderUploader()
         {
+            CleanUserReceipts();
             return View();
         }
 
+        /// <summary>
+        ///     Recieves the uploaded files from the view, processes each one in parallel,
+        ///     then returns all processed receipts to the view.
+        /// </summary>
         [HttpPost("UploadReceipts")]
         [DisableRequestSizeLimit]
         public async Task<IActionResult> PostAsync()
@@ -38,13 +49,16 @@ namespace PaychexReceiptOCR.Controllers
             // Recieves files uploaded from the form
             var uploads = HttpContext.Request.Form.Files;
 
+            // Used for progress bar 
+            double totalReceipts = uploads.Count;
+
             // Holds the collection of tasks
             List<Task<Receipt>> createReceiptTasks = new List<Task<Receipt>>();
 
             // Processes each IFormFile in parallel
             foreach (var upload in uploads)
             {
-                createReceiptTasks.Add(CreateReceiptAsync(upload, wwwrootPath));
+                createReceiptTasks.Add(CreateReceiptAsync(upload, wwwrootPath, totalReceipts));
             }
 
             // A List<Receipt> object that is returned when all the tasks are complete
@@ -54,8 +68,11 @@ namespace PaychexReceiptOCR.Controllers
             return View(receipts);
         }
 
-        // Processes the IFormFile
-        private async Task<Receipt> CreateReceiptAsync(IFormFile image, string rootPath)
+        /// <summary>
+        ///     Recieves the IFormFile and returns a receipt object from it which contains an OCR reading 
+        ///     and a Regex analysis of key data points.
+        /// </summary>
+        private async Task<Receipt> CreateReceiptAsync(IFormFile image, string rootPath, double totalReceipts)
         {
             // Finds path to wwwroot
             string contentRootPath = _env.ContentRootPath;
@@ -90,8 +107,70 @@ namespace PaychexReceiptOCR.Controllers
                 // Finds the date and cost
                 RegexMethods.FindDateAndCost(readReceipt, contentRootPath);
             }
-            
+
+            // Increments the receipts processed and stores the percentage of completion of all receipts in the
+            // text file which can be read by the Status() method
+            receiptsProcessed++;
+            string percent = Convert.ToInt32((receiptsProcessed / totalReceipts) * 100).ToString();
+
+            // Catches possibility of exception being thrown because multiple asynchronous methods 
+            // may attempt to write or read from the file at the same time.
+            try
+            {
+                if (totalReceipts - receiptsProcessed == 1)
+                {
+                    System.IO.File.WriteAllText(Path.Combine(contentRootPath + "\\Log\\log.txt"), "100");
+                }
+                else if (!(totalReceipts - receiptsProcessed == 0))
+                {
+                    System.IO.File.WriteAllText(Path.Combine(contentRootPath + "\\Log\\log.txt"), percent);
+                }
+                else
+                {
+                    System.IO.File.WriteAllText(Path.Combine(contentRootPath + "\\Log\\log.txt"), "0");
+                }
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError(e.ToString());
+                Debug.Write("Unexpected Error: " + e.Message);
+                Debug.Write("Details: ");
+                Debug.Write(e.ToString());
+            };
+
             return readReceipt;
+        }
+
+        /// <summary>
+        ///     Checks the \\Log\\log.txt file for the current percentage of completion of the receipt processing.
+        /// </summary>
+        public JsonResult Status()
+        {
+            string contentRootPath = _env.ContentRootPath;
+            string text = System.IO.File.ReadAllText(Path.Combine(contentRootPath + "\\Log\\log.txt"));
+            string percent = text + '%';
+            return Json(percent);
+        }
+
+        /// <summary>
+        ///     Clears out all leftover files in the userReceipts folder from previous iterations of program .
+        /// </summary>
+        public void CleanUserReceipts()
+        {
+            // Finds path to wwwroot
+            string wwwrootPath = _env.WebRootPath;
+
+            System.IO.DirectoryInfo userReceipts = new DirectoryInfo(wwwrootPath + "\\userReceipts");
+
+            foreach (FileInfo file in userReceipts.GetFiles())
+            {
+                // This is a placeholder receipt which is kept in userReceipts to prevent GitHub from deleting 
+                // the folder since it is empty before the program is run.
+                if(file.Name != "Delta.png")
+                {
+                    file.Delete();
+                }
+            }
         }
     }
 }

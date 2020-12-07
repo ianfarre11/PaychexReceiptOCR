@@ -30,23 +30,31 @@
         </div>
     </div>
 
-    <!-- I know this shouldn't go here but the site.css file wasn't connecting-->
-    <style>
-        .center {
-            margin: 0;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            -ms-transform: translate(-50%, -50%);
-            transform: translate(-50%, -50%);
-        }
-    </style>
+    <div class="progress" style="height: 20px; visibility: hidden;" id="progressBar">
+        <div id="bar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
 
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script>
         // Makes Spinner visible and hides form while the controller is loading
         function showSpinner() {
             document.getElementById("spinner").style.visibility = "visible";
+            document.getElementById("progressBar").style.visibility = "visible";
             document.getElementById("FormDiv").style.display = "none";
+            updateBar();
+        }
+
+        // Calls controller Status method to get percentage of receipts processed
+        // and update the progress bar with it, calls itself every 2 seconds
+        // to check for updates
+        function updateBar() {
+            var action = '@Url.Action("Status","UploadReceipts")';
+            $.getJSON(action, function (something) {
+                $('#bar').css('width', something);
+                if (something != "100%") {
+                    setTimeout(updateBar, 2000);
+                }
+            });
         }
     </script>
 
