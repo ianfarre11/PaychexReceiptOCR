@@ -5,7 +5,28 @@
     <title>Receipt Data</title>
 </head>
 <body>
-    <table class="table">
+
+    <nav class="navbar navbar-light bg-light">
+        <input type="text" id="myInput" onkeyup="tableSearch()" placeholder="Search for Vendor..." title="The vendor search">
+
+        <div style="float:right">
+            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                <label class="btn btn-secondary">
+                    <input type="radio" name="groupOfMaterialRadios" id="Greater" value=">" autocomplete="off"> >
+                </label>
+                <label class="btn btn-secondary">
+                    <input type="radio" name="groupOfMaterialRadios" id="Less" value="<" autocomplete="off"> <
+                </label>
+                <label class="btn btn-secondary">
+                    <input type="radio" name="groupOfMaterialRadios" id="Equal" value="=" autocomplete="off"> =
+                </label>
+            </div>
+            <input type="text" id="myInputPrice" placeholder="Enter Value" title="Search for Cost..." />
+            <button type="button" class="btn btn-light" onclick="tableSearch2()"> Filter</button>
+        </div>
+    </nav>
+
+    <table class="table" id="myTable">
         <thead>
             <tr>
                 <th>File Name</th>
@@ -32,29 +53,29 @@
                     name = receipt.Name.Substring(0, 15) + "...";
                 }
 
-            <tr>
-                <td><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#@imageId">@name</button></td>
-                <td>@receipt.Vendor</td>
-                @if (receipt.TotalCost != "Unknown")
-                {
-                    <td>$@receipt.TotalCost</td>
-                }
-                else
-                {
-                    <td>@receipt.TotalCost</td>
-                }
-                <td>@receipt.Date</td>
-                <!-- Checks if OCR reading was successful
-                If it was, displays the mean confidence in the table and links to the Modal PopUp of the reading-->
-                @if (String.IsNullOrWhiteSpace(receipt.RawText))
-                {
-                    <td>Couldn't Read</td>
-                }
-                else
-                {
-                    <td><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#@readingId">@receipt.MeanConfidence</button></td>
-                }
-            </tr>
+                <tr>
+                    <td><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#@imageId">@name</button></td>
+                    <td>@receipt.Vendor</td>
+                    @if (receipt.TotalCost != "Unknown")
+                    {
+                        <td>$@receipt.TotalCost</td>
+                    }
+                    else
+                    {
+                        <td>@receipt.TotalCost</td>
+                    }
+                    <td>@receipt.Date</td>
+                    <!-- Checks if OCR reading was successful
+                    If it was, displays the mean confidence in the table and links to the Modal PopUp of the reading-->
+                    @if (String.IsNullOrWhiteSpace(receipt.RawText))
+                    {
+                        <td>Couldn't Read</td>
+                    }
+                    else
+                    {
+                        <td><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#@readingId">@receipt.MeanConfidence</button></td>
+                    }
+                </tr>
 
                 counter++;
             }
