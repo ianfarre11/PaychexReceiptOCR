@@ -2,7 +2,7 @@
 // for details on configuring this project to bundle and minify static web assets.
 
 // Write your JavaScript code.
-function tableSearch() {
+function vendorSearch() {
     // Declare variables
     var input, filter, table, tr, td, i, txtValue;
     input = document.getElementById("myInput");
@@ -24,7 +24,7 @@ function tableSearch() {
     }
 }
 
-function tableSearch2() {
+function priceSearch() {
     var input, filter, table, tr, td, i, txtValue, radioButton, txtValue1, txtValue2;
     input = document.getElementById("myInputPrice");
     filter = parseFloat(input.value);
@@ -91,6 +91,21 @@ function tableSearch2() {
                     }
                 }
             }
+        }
+    }
+}
+
+function resetTable() {
+    // Declare variables
+    var table, tr, td, i;
+    table = document.getElementById("myTable");
+    tr = table.getElementsByTagName("tr");
+
+    // Loop through all table rows, and hide those who don't match the search query
+    for (i = 0; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName("td")[1];
+        if (td) {
+            tr[i].style.display = "";
         }
     }
 }

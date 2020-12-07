@@ -7,7 +7,7 @@
 <body>
 
     <nav class="navbar navbar-light bg-light">
-        <input type="text" id="myInput" onkeyup="tableSearch()" placeholder="Search for Vendor..." title="The vendor search">
+        <input type="text" id="myInput" onkeyup="vendorSearch()" placeholder="Search for Vendor..." title="The vendor search">
 
         <div style="float:right">
             <div class="btn-group btn-group-toggle" data-toggle="buttons">
@@ -22,7 +22,8 @@
                 </label>
             </div>
             <input type="text" id="myInputPrice" placeholder="Enter Value" title="Search for Cost..." />
-            <button type="button" class="btn btn-light" onclick="tableSearch2()"> Filter</button>
+            <button type="button" class="btn btn-light" onclick="priceSearch()"> Filter</button>
+            <button type="button" class="btn btn-light" onclick="resetTable()"> Reset</button>
         </div>
     </nav>
 
