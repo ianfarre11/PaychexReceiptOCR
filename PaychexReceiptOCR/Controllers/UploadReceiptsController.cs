@@ -119,15 +119,15 @@ namespace PaychexReceiptOCR.Controllers
             {
                 if (totalReceipts - receiptsProcessed == 1)
                 {
-                    System.IO.File.WriteAllText(Path.Combine(contentRootPath + "\\Properties\\Log\\log.txt"), "100");
+                    System.IO.File.WriteAllText(Path.Combine(contentRootPath + "\\Log\\log.txt"), "100");
                 }
                 else if (!(totalReceipts - receiptsProcessed == 0))
                 {
-                    System.IO.File.WriteAllText(Path.Combine(contentRootPath + "\\Properties\\Log\\log.txt"), percent);
+                    System.IO.File.WriteAllText(Path.Combine(contentRootPath + "\\Log\\log.txt"), percent);
                 }
                 else
                 {
-                    System.IO.File.WriteAllText(Path.Combine(contentRootPath + "\\Properties\\Log\\log.txt"), "0");
+                    System.IO.File.WriteAllText(Path.Combine(contentRootPath + "\\Log\\log.txt"), "0");
                 }
             }
             catch (Exception e)
@@ -147,7 +147,7 @@ namespace PaychexReceiptOCR.Controllers
         public JsonResult Status()
         {
             string contentRootPath = _env.ContentRootPath;
-            string text = System.IO.File.ReadAllText(Path.Combine(contentRootPath + "\\Properties\\Log\\log.txt"));
+            string text = System.IO.File.ReadAllText(Path.Combine(contentRootPath + "\\Log\\log.txt"));
             string percent = text + '%';
             return Json(percent);
         }
