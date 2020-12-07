@@ -25,14 +25,20 @@ namespace PaychexReceiptOCR.Controllers
 
         public IActionResult FileUploader()
         {
+            CleanUserReceipts();
             return View();
         }
 
         public IActionResult FolderUploader()
         {
+            CleanUserReceipts();
             return View();
         }
 
+        /// <summary>
+        ///     Recieves the uploaded files from the view, processes each one in parallel,
+        ///     then returns all processed receipts to the view.
+        /// </summary>
         [HttpPost("UploadReceipts")]
         [DisableRequestSizeLimit]
         public async Task<IActionResult> PostAsync()
@@ -62,7 +68,10 @@ namespace PaychexReceiptOCR.Controllers
             return View(receipts);
         }
 
-        // Processes the IFormFile
+        /// <summary>
+        ///     Recieves the IFormFile and returns a receipt object from it which contains an OCR reading 
+        ///     and a Regex analysis of key data points.
+        /// </summary>
         private async Task<Receipt> CreateReceiptAsync(IFormFile image, string rootPath, double totalReceipts)
         {
             // Finds path to wwwroot
@@ -131,14 +140,37 @@ namespace PaychexReceiptOCR.Controllers
 
             return readReceipt;
         }
-        
-        // Checks the \\Log\\log.txt file for the current percentage of completion
+
+        /// <summary>
+        ///     Checks the \\Log\\log.txt file for the current percentage of completion of the receipt processing.
+        /// </summary>
         public JsonResult Status()
         {
             string contentRootPath = _env.ContentRootPath;
             string text = System.IO.File.ReadAllText(Path.Combine(contentRootPath + "\\Properties\\Log\\log.txt"));
             string percent = text + '%';
             return Json(percent);
+        }
+
+        /// <summary>
+        ///     Clears out all leftover files in the userReceipts folder from previous iterations of program .
+        /// </summary>
+        public void CleanUserReceipts()
+        {
+            // Finds path to wwwroot
+            string wwwrootPath = _env.WebRootPath;
+
+            System.IO.DirectoryInfo userReceipts = new DirectoryInfo(wwwrootPath + "\\userReceipts");
+
+            foreach (FileInfo file in userReceipts.GetFiles())
+            {
+                // This is a placeholder receipt which is kept in userReceipts to prevent GitHub from deleting 
+                // the folder since it is empty before the program is run.
+                if(file.Name != "Delta.png")
+                {
+                    file.Delete();
+                }
+            }
         }
     }
 }
