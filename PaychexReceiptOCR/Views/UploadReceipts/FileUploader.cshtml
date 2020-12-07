@@ -34,19 +34,6 @@
         <div id="bar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
     </div>
 
-
-    <!-- I know this shouldn't go here but the site.css file wasn't connecting-->
-    <style>
-        .center {
-            margin: 0;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            -ms-transform: translate(-50%, -50%);
-            transform: translate(-50%, -50%);
-        }
-    </style>
-
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script>
         // Makes Spinner visible and hides form while the controller is loading
@@ -64,7 +51,9 @@
             var action = '@Url.Action("Status","UploadReceipts")';
             $.getJSON(action, function (something) {
                 $('#bar').css('width', something);
-                setTimeout(updateBar, 2000);
+                if (something != "100%") {
+                    setTimeout(updateBar, 2000);
+                }
             });
         }
     </script>

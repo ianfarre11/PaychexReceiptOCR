@@ -101,10 +101,13 @@ namespace PaychexReceiptOCR.Controllers
 
             // Increments the receipts processed and stores the percentage of completion of all receipts in the
             // text file which can be read by the Status() method
+            receiptsProcessed++;
+            string percent = Convert.ToInt32((receiptsProcessed / totalReceipts) * 100).ToString();
+
+            // Catches possibility of exception being thrown because multiple asynchronous methods 
+            // may attempt to write or read from the file at the same time.
             try
             {
-                receiptsProcessed++;
-                string percent = Convert.ToInt32((receiptsProcessed / totalReceipts) * 100).ToString();
                 if (totalReceipts - receiptsProcessed == 1)
                 {
                     System.IO.File.WriteAllText(Path.Combine(contentRootPath + "\\Properties\\Log\\log.txt"), "100");
