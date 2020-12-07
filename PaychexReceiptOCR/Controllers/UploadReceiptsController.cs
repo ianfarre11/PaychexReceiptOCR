@@ -7,6 +7,7 @@ using PaychexReceiptOCR.Models;
 using System.Threading.Tasks;
 using PaychexReceiptOCR.Helpers;
 using System;
+using System.Diagnostics;
 
 namespace PaychexReceiptOCR.Controllers
 {
@@ -100,19 +101,30 @@ namespace PaychexReceiptOCR.Controllers
 
             // Increments the receipts processed and stores the percentage of completion of all receipts in the
             // text file which can be read by the Status() method
-            receiptsProcessed++;
-            string percent = Convert.ToInt32((receiptsProcessed / totalReceipts) * 100).ToString();
-            if (totalReceipts - receiptsProcessed == 1)
+            try
             {
-                System.IO.File.WriteAllText(Path.Combine(contentRootPath + "\\Properties\\Log\\log.txt"), "100");
+                receiptsProcessed++;
+                string percent = Convert.ToInt32((receiptsProcessed / totalReceipts) * 100).ToString();
+                if (totalReceipts - receiptsProcessed == 1)
+                {
+                    System.IO.File.WriteAllText(Path.Combine(contentRootPath + "\\Properties\\Log\\log.txt"), "100");
+                }
+                else if (!(totalReceipts - receiptsProcessed == 0))
+                {
+                    System.IO.File.WriteAllText(Path.Combine(contentRootPath + "\\Properties\\Log\\log.txt"), percent);
+                }
+                else
+                {
+                    System.IO.File.WriteAllText(Path.Combine(contentRootPath + "\\Properties\\Log\\log.txt"), "0");
+                }
             }
-            else if(!(totalReceipts - receiptsProcessed == 0))
+            catch (Exception e)
             {
-                System.IO.File.WriteAllText(Path.Combine(contentRootPath + "\\Properties\\Log\\log.txt"), percent);
-            } else
-            {
-                System.IO.File.WriteAllText(Path.Combine(contentRootPath + "\\Properties\\Log\\log.txt"), "0");
-            }
+                Trace.TraceError(e.ToString());
+                Debug.Write("Unexpected Error: " + e.Message);
+                Debug.Write("Details: ");
+                Debug.Write(e.ToString());
+            };
 
             return readReceipt;
         }
