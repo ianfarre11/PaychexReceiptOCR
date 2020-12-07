@@ -6,12 +6,16 @@ using Microsoft.AspNetCore.Mvc;
 using PaychexReceiptOCR.Models;
 using System.Threading.Tasks;
 using PaychexReceiptOCR.Helpers;
+using System;
 
 namespace PaychexReceiptOCR.Controllers
 {
     public class UploadReceiptsController : Controller
     {
         private readonly IWebHostEnvironment _env;
+
+        // Used for Progress Bar
+        private double receiptsProcessed = 0;
 
         public UploadReceiptsController(IWebHostEnvironment env)
         {
@@ -38,13 +42,16 @@ namespace PaychexReceiptOCR.Controllers
             // Recieves files uploaded from the form
             var uploads = HttpContext.Request.Form.Files;
 
+            // Used for progress bar 
+            double totalReceipts = uploads.Count;
+
             // Holds the collection of tasks
             List<Task<Receipt>> createReceiptTasks = new List<Task<Receipt>>();
 
             // Processes each IFormFile in parallel
             foreach (var upload in uploads)
             {
-                createReceiptTasks.Add(CreateReceiptAsync(upload, wwwrootPath));
+                createReceiptTasks.Add(CreateReceiptAsync(upload, wwwrootPath, totalReceipts));
             }
 
             // A List<Receipt> object that is returned when all the tasks are complete
@@ -55,7 +62,7 @@ namespace PaychexReceiptOCR.Controllers
         }
 
         // Processes the IFormFile
-        private async Task<Receipt> CreateReceiptAsync(IFormFile image, string rootPath)
+        private async Task<Receipt> CreateReceiptAsync(IFormFile image, string rootPath, double totalReceipts)
         {
             // Finds path to wwwroot
             string contentRootPath = _env.ContentRootPath;
@@ -90,8 +97,33 @@ namespace PaychexReceiptOCR.Controllers
                 // Finds the date and cost
                 RegexMethods.FindDateAndCost(readReceipt, contentRootPath);
             }
-            
+
+            // Increments the receipts processed and stores the percentage of completion of all receipts in the
+            // text file which can be read by the Status() method
+            receiptsProcessed++;
+            string percent = Convert.ToInt32((receiptsProcessed / totalReceipts) * 100).ToString();
+            if (totalReceipts - receiptsProcessed == 1)
+            {
+                System.IO.File.WriteAllText(Path.Combine(contentRootPath + "\\Properties\\Log\\log.txt"), "100");
+            }
+            else if(!(totalReceipts - receiptsProcessed == 0))
+            {
+                System.IO.File.WriteAllText(Path.Combine(contentRootPath + "\\Properties\\Log\\log.txt"), percent);
+            } else
+            {
+                System.IO.File.WriteAllText(Path.Combine(contentRootPath + "\\Properties\\Log\\log.txt"), "0");
+            }
+
             return readReceipt;
+        }
+        
+        // Checks the \\Log\\log.txt file for the current percentage of completion
+        public JsonResult Status()
+        {
+            string contentRootPath = _env.ContentRootPath;
+            string text = System.IO.File.ReadAllText(Path.Combine(contentRootPath + "\\Properties\\Log\\log.txt"));
+            string percent = text + '%';
+            return Json(percent);
         }
     }
 }
